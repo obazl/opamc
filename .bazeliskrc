@@ -1,0 +1,2 @@
+# USE_BAZEL_VERSION=latest
+# USE_BAZEL_VERSION=last_green

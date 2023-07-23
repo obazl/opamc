@@ -1,0 +1,4 @@
+= libopam
+C API for reading OPAM files
+
+WARNING: Not ready for use.

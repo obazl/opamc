@@ -1,0 +1,309 @@
+load("@bazel_skylib//rules:common_settings.bzl",
+     "bool_flag", "string_flag")
+
+load("@makeheaders//src:RULES.bzl", "makeheaders")
+load("@lemon//src:BUILD.bzl", "lemon")
+
+load("//config/cc:BUILD.bzl",
+     "BASE_SRCS", "BASE_DEPS", "BASE_INCLUDE_PATHS",
+     "BASE_COPTS", "BASE_DEFINES", "BASE_LINKOPTS")
+
+SRCS          = BASE_SRCS
+COPTS         = BASE_COPTS + BASE_INCLUDE_PATHS
+DEPS          = BASE_DEPS
+DEFINES       = BASE_DEFINES
+LINKOPTS      = BASE_LINKOPTS
+TOOLCHAINS = ["//:repo_paths"]
+
+exports_files(["tracing_enabled.h", "tracing_disabled.h",
+               "ansi_colors.h"])
+# exports_files(glob(["*.c"], exclude = ["tracing_disabled.h"]))
+
+###########
+cc_library(
+    name = "opamc",
+    srcs = ["opam_config.c", "cmd_runner.c", ":mkhdrs"],
+    hdrs = ["opamc.h"],
+    deps = [
+        "//src/parser:opam_parser",
+        # "//src/emitters:bazel"
+        # "@findlibc//src:findlibc"
+    ],
+    copts = COPTS + [
+        "-I$(GENDIR)/$(@)/src",
+        "-I$(@uthash)/src"
+    ],
+    local_defines = DEFINES,
+    linkopts = LINKOPTS,
+    toolchains = TOOLCHAINS,
+    visibility = ["//visibility:public"]
+)
+
+################################################################
+####    OPAM Parser
+################################################################
+# cc_library(
+#     name = "opam_parser",
+#     srcs = SRCS + [
+#         "opam_parser.c",
+#         ":mkhdrs"
+#         ],
+#     # hdrs = [
+#     #     "libopamparser.h",
+#     # ],
+#     copts = COPTS + [
+#         # "-Wno-unused-variable", # in lemon-generated code
+
+#         "-I$(GENDIR)/$(@)/src",
+#         # "-Isrc",
+#         # "-Iexternal/src",
+#         # "-I$(GENDIR)/src",
+
+#         # "-Isrc/hdrs",
+#         # "-I$(GENDIR)/src/hdrs",
+#         # "-I$(GENDIR)/external/mibl/src/hdrs",
+
+#         # "-Isrc/opam",
+#         # "-I$(GENDIR)/src/opam",
+#         # "-I$(GENDIR)/external/mibl/src/opam",
+
+#         "-I$(GENDIR)/$(@)/src/lexer",
+#         "-I$(@liblogc)/src",
+#         "-I$(@uthash)/src"
+#     ],
+#     local_defines = select({
+#         ":lexdebug-enabled": ["LEXDEBUG"],
+#         "//conditions:default":   []
+#     }),
+#     deps = DEPS + [
+#         ":opam_syntaxis",
+#         "//src/lexer:opam_lexer",
+#         # "@liblogc//src:logc",
+#         "@uthash//src:uthash"
+#     ],
+#     toolchains = TOOLCHAINS,
+#     visibility = ["//extender:__pkg__",
+#                   "//test:__subpackages__"]
+# )
+
+# ###########
+# cc_library(
+#     name = "opam_syntaxis",
+#     srcs = [
+#         "opam_syntaxis.c",
+#         ":mkhdrs"
+#     ],
+#     deps = [
+#         "@liblogc//src:logc",
+#         "@uthash//src:uthash"
+#     ],
+#     copts = COPTS + [
+#         "-Wno-unused-variable",  # from lemon-generated code
+#         "-Wno-unused-parameter",  # from lemon-generated code
+
+#         # "-Iexternal/mibl/src",
+#         # "-I$(GENDIR)/src/hdrs",
+
+#         # "-I$(GENDIR)/src/opam",
+#         # "-I$(GENDIR)/mibl/src/opam",
+#         # "-I$(GENDIR)/external/mibl/src/opam",
+
+#         # "-Iexternal/liblogc~{}/src".format(LIBLOGC_VERSION),
+#         "-Iexternal/uthash~{}/src".format(UTHASH_VERSION)
+#     ],
+#     defines = select({
+#         ":yydebug-enabled": ["YYDEBUG"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":yytrace-enabled": ["YYTRACE"],
+#         "//conditions:default":   []
+#     }),
+#     # to add: YYDEBUG_FILTER, etc.
+#     visibility = ["//test:__subpackages__"]
+# )
+
+# lemon(
+#     name = "gen_opam_syntaxis",
+#     yy   = "opam_syntaxis.y",
+#     outs = ["opam_syntaxis.c","opam_syntaxis.out"],
+#     compress = False,
+#     ## NB: these are for lemon's %if, not cpp's #if
+#     ## fvf = filtered version formula
+#     ## fpf = filtered package formula
+#     defines = select({
+#         ":yydebug-enabled": ["YYDEBUG"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":yydebug-exit-on-error-enabled": ["YYDEBUG_EXIT_ON_ERROR"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":yydebug-filter": ["YYDEBUG_FILTER"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":yydebug-fpf": ["YYDEBUG_FPF"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":lexdebug-fvf": ["YYDEBUG_FVF"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":yydebug-build-filter": ["YYDEBUG_BUILD_FILTER"],
+#         "//conditions:default":   []
+#     }),
+#     visibility = ["//src/hdrs:__pkg__", "//src/lexer:__pkg__"]
+# )
+
+# ###########
+# cc_library(
+#     name = "opam_lexer",
+#     srcs = [
+#         "opam_lexer.c",
+#         "opam_lexis.c",
+#         ":mkhdrs"
+#     ],
+#     copts = COPTS + [
+#         "-Wno-unused-parameter", # macos
+#         "-Isrc",
+#         "-Isrc/hdrs",
+#         "-Isrc/opam",
+#         "-I$(GENDIR)/src",
+
+#         "-I$(GENDIR)/src/opam",
+#         "-I$(GENDIR)/external/mibl/src/opam",
+
+#         "-I$(GENDIR)/src/hdrs",
+#         "-I$(GENDIR)/external/mibl/src/hdrs",
+
+#         # "-Iexternal/liblogc~{}/src".format(LIBLOGC_VERSION),
+#         "-Iexternal/uthash~{}/src".format(UTHASH_VERSION)
+#     ],
+#     deps = DEPS + [
+#             "@uthash//src:uthash"],
+#     local_defines = DEFINES + select({
+#         ":yydebug-enabled": ["YYDEBUG"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":lexdebug-enabled": ["LEXDEBUG"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":lexdebug-version": ["LEXDEBUG_VERSION"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":lexdebug-fpf": ["LEXDEBUG_FPF"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":lexdebug-fvf": ["LEXDEBUG_FVF"],
+#         "//conditions:default":   []
+#     }) + select({
+#         ":lexdebug-build-filter": ["LEXDEBUG_BUILD_FILTER"],
+#         "//conditions:default":   []
+#     }),
+#     visibility = ["//test:__subpackages__"]
+# )
+
+################################################################
+# re2c takes a long time to build, so we only run it
+# when opam_lexis.re changes, which is rare.
+# to regenerate opam_lexis.c: delete src/opam_lexis.c
+# and uncomment this target. Once the new version is copacetic,
+# copy it into the src tree and comment this out.
+# genrule(
+#     name = "gen_opam_lexis",
+#     outs  = ["opam_lexis.c"],
+#     srcs = ["opam_lexis.re"],
+#     tools = ["@re2c//:re2c"],
+#     cmd   = "\n".join([
+#         "for f in $(locations @re2c//:re2c)",
+#         "do",
+#         "    if [ -f $$f ]",
+#         "    then",
+#         "        if [ re2c = `basename $$f` -a -x $$f ]",
+#         "        then",
+#         "            break",
+#         "        fi",
+#         "    fi",
+#         "done",
+#         "$$f --conditions --tags -o $(@D)/opam_lexis.c $(location opam_lexis.re)",
+#     ]),
+#     visibility = ["//visibility:public"]
+# )
+
+################################################################
+makeheaders(
+    name = "mkhdrs",
+    hdrs_srcs = [
+        "opam_config.c",
+        "cmd_runner.c",
+        "//src/parser:opam_parser.c",
+        # "//src/parser:opam_syntaxis.c", ## defines token_type constants
+        "//src/parser:opam_package.c", ## ast node types, etc.
+        # "opam_lexer.c",
+        # "opam_lexis.c",
+    ],
+    additional_srcs = [
+        "//src/lexer:opamlexer.h"
+    ] + select({
+        "//config/profile:dev?": [
+            "//src:ansi_colors.h", "tracing_enabled.h"
+        ],
+        "//conditions:default": ["tracing_disabled.h"]
+    }),
+    visibility = ["//visibility:public"]
+)
+
+makeheaders(
+    name = "mkhdrs_export",
+    out = "opamc.h",
+    export_interface = True,
+    hdrs_srcs = [
+        "opam_config.c",
+        # "//src/lexer:opam_lexer.c",
+        "//src/parser:opam_parser.c",
+        "//src/parser:opam_package.c",
+        # "opam_lexis.c",
+        # "opam_syntaxis.c",
+        # "//src/emitters:mkhdrs"
+    ],
+    visibility = ["//visibility:public"]
+)
+
+################################################################
+## enable parser debugging: --//bootstrap:yydebug
+bool_flag(name = "yydebug", build_setting_default = 0)
+config_setting(name = "yydebug-enabled", flag_values = {":yydebug": "True"})
+config_setting(name = "yydebug-disabled", flag_values = {":yydebug": "False"})
+bool_flag(name = "yydebug-exit-on-error", build_setting_default = 0)
+config_setting(name = "yydebug-exit-on-error-enabled",
+               flag_values = {":yydebug-exit-on-error": "True"})
+
+bool_flag(name = "yytrace", build_setting_default = 0)
+config_setting(name = "yytrace-enabled", flag_values = {":yytrace": "True"})
+config_setting(name = "yytrace-disabled", flag_values = {":yytrace": "False"})
+
+## debug parse rules
+string_flag(name = "yydebug-rules", build_setting_default = "")
+config_setting(name = "yydebug-fpf",
+               flag_values = {":yydebug-rules": "fpf"})
+config_setting(name = "yydebug-fvf",
+               flag_values = {":yydebug-rules": "fvf"})
+config_setting(name = "yydebug-filter",
+               flag_values = {":yydebug-rules": "filter"})
+config_setting(name = "yydebug-build-filter",
+               flag_values = {":yydebug-rules": "build-filter"})
+
+## enable lexer debugging: --//bootstrap:lexdebug
+bool_flag(name = "lexdebug", build_setting_default = 0)
+config_setting(name = "lexdebug-enabled", flag_values = {":lexdebug": "True"})
+config_setting(name = "lexdebug-disabled", flag_values = {":lexdebug": "False"})
+
+string_flag(name = "lexdebug-rules", build_setting_default = "")
+config_setting(name = "lexdebug-version",
+               flag_values = {":lexdebug-rules": "version"})
+config_setting(name = "lexdebug-fpf",
+               flag_values = {":lexdebug-rules": "fpf"})
+config_setting(name = "lexdebug-fvf",
+               flag_values = {":lexdebug-rules": "fvf"})
+config_setting(name = "lexdebug-filter",
+               flag_values = {":lexdebug-rules": "filter"})
+config_setting(name = "lexdebug-build-filter",
+               flag_values = {":lexdebug-rules": "build-filter"})
+

@@ -1,0 +1,20 @@
+load("@cc_config//:MACROS.bzl", "repo_paths")
+
+PROD_REPOS = [
+    "@findlibc//src:findlibc",
+    "@liblogc//src:logc",
+    "@uthash//src:uthash",
+]
+
+repo_paths(
+    name = "repo_paths",
+    repos = PROD_REPOS
+)
+
+repo_paths(
+    name = "test_repo_paths",
+    repos = PROD_REPOS + [
+        "@unity//src:unity"
+    ]
+)
+
