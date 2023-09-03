@@ -237,12 +237,12 @@ EXPORT char *opam_switch_stublibs(char *opam_switch)
     return result;
 }
 
-EXPORT char *opam_switch_ocaml_version(void)
+EXPORT char *opam_switch_ocaml_version(char *opam_switch)
 {
     TRACE_ENTRY
     char *result = NULL;
     char *exe = "opam";
-    char *argv[] = {"opam", "var", "ocaml:version", NULL};
+    char *argv[] = {"opam", "var", "ocaml:version", "--switch", opam_switch, NULL};
     result = run_cmd(exe, argv);
     if (result == NULL) {
         fprintf(stderr, "FAIL: run_cmd 'opam var ocaml:version'\n");
@@ -250,12 +250,12 @@ EXPORT char *opam_switch_ocaml_version(void)
     return result;
 }
 
-EXPORT char *opam_switch_base_compiler_version(void)
+EXPORT char *opam_switch_base_compiler_version(char *opam_switch)
 {
     TRACE_ENTRY
     char *result = NULL;
     char *exe = "opam";
-    char *argv[] = {"opam", "var", "ocaml-base-compiler:version", NULL};
+    char *argv[] = {"opam", "var", "ocaml-base-compiler:version", "--switch", opam_switch, NULL};
     result = run_cmd(exe, argv);
     if (result == NULL) {
         fprintf(stderr, "FAIL: run_cmd 'opam var ocaml-base-compiler:version'\n");
