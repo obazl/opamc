@@ -130,6 +130,13 @@ EXPORT char *run_cmd(char *executable, char **argv)
     // FIXME: restrict environ
 
     /* log_debug("spawning %s", executable); */
+    /* char *nullenv[4] = { */
+    /*     "PATH=usr/local/bin", */
+    /*     "OPAMROOT=/Users/gar/.opam", */
+    /*     "OPAM_SWITCH_PREFIX=/Users/gar/obazl/demos_obazl/rules_ocaml/_opam", */
+    /*     NULL */
+    /* }; */
+
     errno = 0;
     rc = posix_spawnp(&pid, executable, &action, NULL, argv, environ);
 

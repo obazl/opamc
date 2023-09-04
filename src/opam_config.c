@@ -184,13 +184,35 @@ EXPORT char *opam_root(void)
 /* ******************************** */
 EXPORT char *opam_switch_name(void)
 {
+    /* log_debug("OOOOOOOOOOOOOOOO"); */
+    /* log_debug("BUILD_WORKSPACE_DIRECTORY: %s", */
+    /*           getenv("BUILD_WORKSPACE_DIRECTORY")); */
+    /* log_debug("OPAM_SWITCH_PREFIX: %s", */
+    /*           getenv("OPAM_SWITCH_PREFIX")); */
+    /* log_debug("CWD: %s", getcwd(NULL,0)); */
+    /* log_debug("PATH: %s", */
+    /*           getenv("PATH")); */
     TRACE_ENTRY
     char *result = NULL;
+
+    /* char *exe = "env"; */
+    /* char *argv0[] = {"env", NULL}; */
+    /* result = run_cmd(exe, argv0, envp); */
+    /* if (result == NULL) { */
+    /*     log_error("FAIL: run_cmd 'opam var switch'"); */
+    /* } else { */
+    /*     log_error("which opam: %s", result); */
+    /* } */
+    /* log_debug("PPPPPPPPPPPPPPPP"); */
+
     char *exe = "opam";
     char *argv[] = {"opam", "var", "switch", NULL};
     result = run_cmd(exe, argv);
     if (result == NULL) {
+        log_error("FAIL: run_cmd 'opam var switch'");
         fprintf(stderr, "FAIL: run_cmd 'opam var switch'\n");
+    /* } else { */
+    /*     log_debug("opam var switch: %s", result); */
     }
     return result;
 }
