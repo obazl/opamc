@@ -1,12 +1,8 @@
-load("//:BUILD.bzl", "LIBLOGC_VERSION")
-
 BASE_SRCS = [] #["//config:config.h", "//config:ansi_colors.h"]
 
 BASE_DEPS = ["@liblogc//src:logc"]
 
-BASE_INCLUDE_PATHS = [
-    "-Iexternal/liblogc~{}/src".format(LIBLOGC_VERSION)
-]
+BASE_INCLUDE_PATHS = []
 
 BASE_COPTS = [
     "-x", "c",

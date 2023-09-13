@@ -1,19 +1,6 @@
-config.log
-config.status
-autom4te.cache
-config/config.h
-config/feature/BUILD.bazel
-# configure
-
 .bazel
 bazel-*
-private
-*.history.txt
-log.*
-*.log
-obsolete
-tmp
-trace
+*.gz
 
 # Prerequisites
 *.d

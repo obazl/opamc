@@ -206,7 +206,8 @@ EXPORT char *opam_switch_name(void)
     /* log_debug("PPPPPPPPPPPPPPPP"); */
 
     char *exe = "opam";
-    char *argv[] = {"opam", "var", "switch", NULL};
+    // or" 'opam var switch'
+    char *argv[] = {"opam", "switch", "show", NULL};
     result = run_cmd(exe, argv);
     if (result == NULL) {
         log_error("FAIL: run_cmd 'opam var switch'");

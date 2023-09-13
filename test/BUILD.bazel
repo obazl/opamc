@@ -1,6 +1,6 @@
 load("@makeheaders//src:RULES.bzl", "makeheaders")
 
-load("//config/cc:BUILD.bzl",
+load("//config/cc:CONFIG.bzl",
      "BASE_SRCS", "BASE_DEPS", "BASE_INCLUDE_PATHS",
      "BASE_COPTS", "BASE_DEFINES", "BASE_LINKOPTS")
 
@@ -12,54 +12,54 @@ LINKOPTS      = BASE_LINKOPTS
 TOOLCHAINS = ["//:test_repo_paths"]
 
 ##########
-cc_binary(
-    name  = "bazel_test",
-    linkstatic = 1,
-    srcs  = [
-        "bazel_test.c",
-        ":mkhdrs"
-    ],
-    deps = [
-        "@liblogc//src:logc",
-        "@uthash//src:uthash",
-        "@findlibc//src:findlibc",
-        "//bazel"
-    ],
-    copts = COPTS + [
-        # "-I$(GENDIR)/src",
-        # "-I$(GENDIR)/bazel",
-        # "-I$(GENDIR)/test",
-        "-I$(GENDIR)/$(@findlibc)/src",
-        "-I$(@liblogc)/src",
-        "-I$(@uthash)/src"
-    ],
-    local_defines = DEFINES,
-    toolchains = TOOLCHAINS,
-)
+# cc_binary(
+#     name  = "bazel_test",
+#     linkstatic = 1,
+#     srcs  = [
+#         "bazel_test.c",
+#         ":mkhdrs"
+#     ],
+#     deps = [
+#         "@liblogc//src:logc",
+#         "@uthash//src:uthash",
+#         # "@findlibc//src:findlibc",
+#         # "//bazel"
+#     ],
+#     copts = COPTS + [
+#         # "-I$(GENDIR)/src",
+#         "-I$(GENDIR)/bazel",
+#         # "-I$(GENDIR)/test",
+#         # "-I$(GENDIR)/$(@findlibc)/src",
+#         "-I$(@liblogc)/src",
+#         "-I$(@uthash)/src"
+#     ],
+#     local_defines = DEFINES,
+#     toolchains = TOOLCHAINS,
+# )
 
 ##########
-cc_binary(
-    name  = "crawl_test",
-    linkstatic = 1,
-    srcs  = [
-        "crawl_test.c",
-        ":mkhdrs"
-    ],
-    copts = COPTS + [
-        "-I$(GENDIR)/src",
-        "-I$(GENDIR)/test",
-        # "-I$(GENDIR)/external/libfindlib~{}/src".format(LIBFINDLIB_VERSION),
-        # "-Iexternal/liblogc~{}/src".format(LIBLOGC_VERSION),
-        # "-Iexternal/uthash~{}/src".format(UTHASH_VERSION)
-    ],
-    local_defines = DEFINES,
-    deps = [
-        "@liblogc//src:logc",
-        "@uthash//src:uthash",
-        "@libfindlib//src:findlib"
-    ],
-    toolchains = TOOLCHAINS,
-)
+# cc_binary(
+#     name  = "crawl_test",
+#     linkstatic = 1,
+#     srcs  = [
+#         "crawl_test.c",
+#         ":mkhdrs"
+#     ],
+#     copts = COPTS + [
+#         "-I$(GENDIR)/src",
+#         "-I$(GENDIR)/test",
+#         # "-I$(GENDIR)/external/libfindlib~{}/src".format(LIBFINDLIB_VERSION),
+#         # "-Iexternal/liblogc~{}/src".format(LIBLOGC_VERSION),
+#         # "-Iexternal/uthash~{}/src".format(UTHASH_VERSION)
+#     ],
+#     local_defines = DEFINES,
+#     deps = [
+#         "@liblogc//src:logc",
+#         "@uthash//src:uthash",
+#         # "@libfindlib//src:findlib"
+#     ],
+#     toolchains = TOOLCHAINS,
+# )
 
 ##########
 cc_binary(
@@ -73,8 +73,8 @@ cc_binary(
         # "-Isrc",
         "-I$(GENDIR)/src",
         "-I$(GENDIR)/test",
-        # "-Iexternal/liblogc~{}/src".format(LIBLOGC_VERSION),
-        # "-Iexternal/uthash~{}/src".format(UTHASH_VERSION)
+        "-I$(@liblogc)/src",
+        "-I$(@uthash)/src"
     ],
     defines = ["DEBUG", "TRACING"],
     deps = [
@@ -177,12 +177,12 @@ makeheaders(
     hdrs_srcs = [
         "bazel_test.c",
         "config_test.c",
-        "crawl_test.c",
+        # "crawl_test.c",
         "lex_test.c",
         "parse_test.c",
     ],
     additional_srcs = [
-        "//bazel:bazel_map_reduce.c",
+        # "//bazel:bazel_map_reduce.c",
     ],
     visibility = ["//visibility:public"]
 )

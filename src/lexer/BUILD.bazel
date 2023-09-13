@@ -4,12 +4,7 @@ load("@bazel_skylib//rules:common_settings.bzl",
 load("@makeheaders//src:RULES.bzl", "makeheaders")
 load("@lemon//src:BUILD.bzl", "lemon")
 
-# load("//:BUILD.bzl",
-#      # "LIBLOGC_VERSION",
-#      "LIBS7_VERSION",
-#      "UTHASH_VERSION")
-
-load("//config/cc:BUILD.bzl",
+load("//config/cc:CONFIG.bzl",
      "BASE_SRCS", "BASE_DEPS", "BASE_INCLUDE_PATHS",
      "BASE_COPTS", "BASE_DEFINES", "BASE_LINKOPTS")
 

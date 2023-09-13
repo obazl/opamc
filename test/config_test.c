@@ -19,7 +19,7 @@
 #include "utstring.h"
 #include "utstring.h"
 
-#include "opam.h"
+#include "opamc.h"
 #include "config_test.h"
 
 bool verbose;
@@ -56,14 +56,14 @@ int main(int argc, char *argv[])
     char *switch_name = opam_switch_name();
     log_debug("switch name: %s", switch_name);
 
-    char *site_lib = opam_switch_site_lib();
+    char *site_lib = opam_switch_lib(switch_name);
     log_debug("site-lib: %s", site_lib);
 
-    char *ocaml_version = opam_switch_ocaml_version();
+    char *ocaml_version = opam_switch_ocaml_version(switch_name);
     log_debug("ocaml_version: %s", ocaml_version);
 
-    char *compiler_version = opam_switch_compiler_version();
-    log_debug("compiler_version: %s", compiler_version);
+    char *compiler_version = opam_switch_base_compiler_version(switch_name);
+    log_debug("base_compiler_version: %s", compiler_version);
 
     log_debug("config_test exiting");
 }

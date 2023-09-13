@@ -19,7 +19,7 @@
 #include "utstring.h"
 #include "utstring.h"
 
-#include "findlib.h"
+/* #include "findlib.h" */
 #include "bazel_test.h"
 
 #include "log.h"
