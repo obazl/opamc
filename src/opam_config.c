@@ -243,6 +243,7 @@ EXPORT char *opam_switch_lib(char *opam_switch)
     if (result == NULL) {
         fprintf(stderr, "FAIL: run_cmd 'opam var lib --switch'\n");
     }
+    TRACE_EXIT;
     return result;
 }
 

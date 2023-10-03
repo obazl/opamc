@@ -11,11 +11,11 @@ load("//config/cc:CONFIG.bzl",
 SRCS          = BASE_SRCS
 COPTS         = BASE_COPTS + BASE_INCLUDE_PATHS
 DEPS          = BASE_DEPS
-DEFINES       = BASE_DEFINES
+DEFINES       = BASE_DEFINES + ["DEBUG_$(COMPILATION_MODE)"]
 LINKOPTS      = BASE_LINKOPTS
 TOOLCHAINS = ["//:repo_paths"]
 
-exports_files(glob(["*.c"], exclude = ["tracing_disabled.h"]))
+exports_files(glob(["*.c"], exclude = ["macros_ndebug.h"]))
 
 ################################################################
 ####    OPAM Parser
@@ -38,7 +38,7 @@ cc_library(
         "-I$(@liblogc)/src",
         "-I$(@uthash)/src",
     ],
-    local_defines = select({
+    local_defines = DEFINES + select({
         ":lexdebug-enabled": ["LEXDEBUG"],
         "//conditions:default":   []
     }),
@@ -128,12 +128,13 @@ makeheaders(
         "opam_package.c", ## ast node types, etc.
     ],
     additional_srcs = [
-        "//src/lexer:opamlexer.h"
+        "//src/lexer:opamlexer.h",
+        "//src:ansi_colors.h",
     ] + select({
-        "//config/profile:dev?": [
-            "//src:ansi_colors.h", "//src:tracing_enabled.h"
+        "//config/compilation_mode:fastbuild?": [
+            "//src:macros_debug.h"
         ],
-        "//conditions:default": ["//src:tracing_disabled.h"]
+        "//conditions:default": ["//src:macros_ndebug.h"]
     }),
     visibility = ["//visibility:public"]
 )

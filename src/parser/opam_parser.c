@@ -97,7 +97,8 @@ EXPORT struct opam_package_s *opam_parse_file(const char *fname)
     }
     fseek(f, 0, SEEK_SET);
     char *buffer = (char*) malloc(fsize + 1);
-    fread(buffer, 1, fsize, f);
+    size_t read_ct = fread(buffer, 1, fsize, f);
+    (void)read_ct; //FIXME: error check
     buffer[fsize] = 0;
     fclose(f);
 

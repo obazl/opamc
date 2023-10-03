@@ -31,11 +31,11 @@
 #include "cmd_runner.h"
 
 /* bool mibl_debug_cmd_runner = false; */
-/* #if defined(DEVBUILD) */
+/* #if defined(DEBUG_fastbuild) */
 /* /\* extern bool mibl_debug_deps; *\/ */
 /* #endif */
 
-bool _debug = false;
+bool _debug = true;
 
 #if INTERFACE
 #define BUFSZ 4096 * 4
@@ -46,7 +46,7 @@ char buffer[BUFSZ];
 EXPORT char *run_cmd(char *executable, char **argv)
 {
     TRACE_ENTRY;
-#if defined(DEVBUILD)
+#if defined(DEBUG_fastbuild)
     if (_debug) {
         char **ptr = argv;
         UT_string *tmp;
@@ -162,7 +162,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
         posix_spawn_file_actions_destroy(&action);
         return NULL;
     }
-#if defined(DEVBUILD)
+#if defined(DEBUG_fastbuild)
     if (_debug)
         log_trace("waitpid for pid %d returned %d", pid, waitrc);
 #endif
@@ -170,7 +170,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
     // child exit OK
     if ( WIFEXITED(status) ) {
         // terminated normally by a call to _exit(2) or exit(3).
-#if defined(DEVBUILD)
+#if defined(DEBUG_fastbuild)
         if (_debug) {
             log_trace("status: %d", status);
             log_trace("WIFEXITED(status): %d", WIFEXITED(status));
@@ -225,7 +225,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
 
         /* log_debug("reading cout_pipe"); */
         bytes_read = read(cout_pipe[0], &buffer[0], BUFSZ);
-#if defined(DEVBUILD)
+#if defined(DEBUG_fastbuild)
         if (_debug)
             log_debug("outpipe bytes_read: %d", bytes_read);
 #endif

@@ -11,7 +11,7 @@ load("//config/cc:CONFIG.bzl",
 SRCS          = BASE_SRCS
 COPTS         = BASE_COPTS + BASE_INCLUDE_PATHS
 DEPS          = BASE_DEPS
-DEFINES       = BASE_DEFINES
+DEFINES       = BASE_DEFINES + ["DEBUG_$(COMPILATION_MODE)"]
 LINKOPTS      = BASE_LINKOPTS
 TOOLCHAINS = ["//:repo_paths"]
 
@@ -241,10 +241,10 @@ makeheaders(
         # "opam_lexis.c",
     ],
     additional_srcs = [
-        "//src/lexer:opamlexer.h"
+        "//src/lexer:opamlexer.h",
         "//src:ansi_colors.h",
     ] + select({
-        "//config/profile:dev?": [
+        "//config/compilation_mode:fastbuild?": [
             "macros_debug.h"
         ],
         "//conditions:default": ["macros_ndebug.h"]

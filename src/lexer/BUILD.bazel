@@ -11,11 +11,11 @@ load("//config/cc:CONFIG.bzl",
 SRCS          = BASE_SRCS
 COPTS         = BASE_COPTS + BASE_INCLUDE_PATHS
 DEPS          = BASE_DEPS
-DEFINES       = BASE_DEFINES
+DEFINES       = BASE_DEFINES + ["DEBUG_$(COMPILATION_MODE)"]
 LINKOPTS      = BASE_LINKOPTS
 TOOLCHAINS = ["//:repo_paths"]
 
-# exports_files(glob(["*.c"], exclude = ["tracing_disabled.h"]))
+# exports_files(glob(["*.c"], exclude = ["macors_ndebug.h"]))
 
 ###########
 cc_library(
@@ -33,7 +33,11 @@ cc_library(
         "-I$(GENDIR)/$(@)/src/lexer",
         "-I$(@liblogc)/src",
         "-I$(@uthash)/src"
-    ],
+    ] + select({
+        # suppress: lexis.re:355:50: error: 'yyt2' may be used uninitialized in this function [-Werror=maybe-uninitialized]
+        "@platforms//os:linux": ["-Wno-maybe-uninitialized"],
+        "//conditions:default": []
+    }),
     local_defines = DEFINES + select({
         ":yydebug-enabled": ["YYDEBUG"],
         "//conditions:default":   []
@@ -100,9 +104,9 @@ makeheaders(
         "//src/parser:opam_syntaxis.c", ## defines token_type constants
     ] + select({
         "//config/profile:dev?": [
-            "//src:ansi_colors.h", "//src:tracing_enabled.h"
+            "//src:ansi_colors.h", "//src:macros_debug.h"
         ],
-        "//conditions:default": ["//src:tracing_disabled.h"]
+        "//conditions:default": ["//src:macros_ndebug.h"]
     }),
     visibility = ["//visibility:public"]
 )
