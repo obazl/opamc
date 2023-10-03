@@ -15,9 +15,9 @@ DEFINES       = BASE_DEFINES
 LINKOPTS      = BASE_LINKOPTS
 TOOLCHAINS = ["//:repo_paths"]
 
-exports_files(["tracing_enabled.h", "tracing_disabled.h",
+exports_files(["macros_debug.h", "macros_ndebug.h",
                "ansi_colors.h"])
-# exports_files(glob(["*.c"], exclude = ["tracing_disabled.h"]))
+# exports_files(glob(["*.c"], exclude = ["macros_ndebug.h"]))
 
 ###########
 cc_library(
@@ -242,11 +242,12 @@ makeheaders(
     ],
     additional_srcs = [
         "//src/lexer:opamlexer.h"
+        "//src:ansi_colors.h",
     ] + select({
         "//config/profile:dev?": [
-            "//src:ansi_colors.h", "tracing_enabled.h"
+            "macros_debug.h"
         ],
-        "//conditions:default": ["tracing_disabled.h"]
+        "//conditions:default": ["macros_ndebug.h"]
     }),
     visibility = ["//visibility:public"]
 )
