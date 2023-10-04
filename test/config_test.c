@@ -25,6 +25,8 @@
 bool verbose;
 int  verbosity;
 
+extern int opamc_debug;
+
 int main(int argc, char *argv[])
 {
     int opt;
@@ -32,12 +34,11 @@ int main(int argc, char *argv[])
     UT_string *opam_file;
     utstring_new(opam_file);
 
-    while ((opt = getopt(argc, argv, "hv")) != -1) {
+    while ((opt = getopt(argc, argv, "dhv")) != -1) {
         switch (opt) {
-        /* case 'f': */
-        /*     /\* BUILD.bazel or BUILD file *\/ */
-        /*     utstring_printf(opam_file, "%s", optarg); */
-        /*     break; */
+        case 'd':
+            opamc_debug++;
+            break;
         case 'h':
             log_info("Help: ");
             exit(EXIT_SUCCESS);

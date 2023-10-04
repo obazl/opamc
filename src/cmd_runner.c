@@ -35,7 +35,11 @@
 /* /\* extern bool mibl_debug_deps; *\/ */
 /* #endif */
 
-bool _debug = true;
+#if defined(DEBUG_fastbuild)
+int  opamc_debug;
+bool opamc_trace;
+#endif
+
 
 #if INTERFACE
 #define BUFSZ 4096 * 4
@@ -47,7 +51,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
 {
     TRACE_ENTRY;
 #if defined(DEBUG_fastbuild)
-    if (_debug) {
+    if (opamc_debug) {
         char **ptr = argv;
         UT_string *tmp;
         utstring_new(tmp);
@@ -56,11 +60,11 @@ EXPORT char *run_cmd(char *executable, char **argv)
             ptr++;
         }
 
-        if (_debug) {
-            log_debug(RED "run_cmd:" CRESET " %s", utstring_body(tmp));
+        if (opamc_debug) {
+            LOG_DEBUG(0, RED "run_cmd:" CRESET " %s", utstring_body(tmp));
             char **p = argv;
             while(*p != NULL) {
-                log_debug("arg: %s", *p);
+                LOG_DEBUG(0, "arg: %s", *p);
                 p++;
             }
         }
@@ -80,14 +84,14 @@ EXPORT char *run_cmd(char *executable, char **argv)
     int cerr_pipe[2];
 
     if(pipe(cout_pipe) || pipe(cerr_pipe)) {
-        log_error("pipe returned an error.");
+        LOG_ERROR(0, "pipe returned an error.", "");
         exit(EXIT_FAILURE);
     }
 
-    /* log_debug("cout_pipe[0]: %d", cout_pipe[0]); */
-    /* log_debug("cout_pipe[1]: %d", cout_pipe[1]); */
-    /* log_debug("cerr_pipe[0]: %d", cout_pipe[0]); */
-    /* log_debug("cerr_pipe[1]: %d", cout_pipe[1]); */
+    /* LOG_DEBUG(0, "cout_pipe[0]: %d", cout_pipe[0]); */
+    /* LOG_DEBUG(0, "cout_pipe[1]: %d", cout_pipe[1]); */
+    /* LOG_DEBUG(0, "cerr_pipe[0]: %d", cout_pipe[0]); */
+    /* LOG_DEBUG(0, "cerr_pipe[1]: %d", cout_pipe[1]); */
 
     posix_spawn_file_actions_t action;
     posix_spawn_file_actions_init(&action);
@@ -129,7 +133,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
     // FIXME: get absolute path of codept
     // FIXME: restrict environ
 
-    /* log_debug("spawning %s", executable); */
+    /* LOG_DEBUG(0, "spawning %s", executable); */
     /* char *nullenv[4] = { */
     /*     "PATH=usr/local/bin", */
     /*     "OPAMROOT=/Users/gar/.opam", */
@@ -154,7 +158,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
     int waitrc = waitpid(pid, &status, 0);
     if (waitrc == -1) {
         perror("spawn_cmd waitpid error");
-        log_error("spawn_cmd");
+        LOG_ERROR(0, "spawn_cmd", "");
         close(cout_pipe[0]);
         close(cerr_pipe[0]);
         close(cout_pipe[1]);
@@ -163,7 +167,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
         return NULL;
     }
 #if defined(DEBUG_fastbuild)
-    if (_debug)
+    if (opamc_debug)
         log_trace("waitpid for pid %d returned %d", pid, waitrc);
 #endif
     /* if (waitrc == 0) { */
@@ -171,7 +175,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
     if ( WIFEXITED(status) ) {
         // terminated normally by a call to _exit(2) or exit(3).
 #if defined(DEBUG_fastbuild)
-        if (_debug) {
+        if (opamc_debug) {
             log_trace("status: %d", status);
             log_trace("WIFEXITED(status): %d", WIFEXITED(status));
             log_trace("WEXITSTATUS(status): %d", WEXITSTATUS(status));
@@ -183,9 +187,9 @@ EXPORT char *run_cmd(char *executable, char **argv)
 
         if (status) {
             /* process exited normally but returned non-zero rc */
-            log_debug("reading cerr_pipe");
+            LOG_DEBUG(0, "reading cerr_pipe", "");
             bytes_read = read(cerr_pipe[0], &buffer[0], BUFSZ);
-            log_debug("readed %d bytes from cerr_pipe", bytes_read);
+            LOG_DEBUG(0, "readed %d bytes from cerr_pipe", bytes_read);
             if (bytes_read > 0) {
                 fprintf(stdout, "Read message: %s", buffer);
             }
@@ -223,11 +227,11 @@ EXPORT char *run_cmd(char *executable, char **argv)
             return NULL; //exit(EXIT_FAILURE);
         }
 
-        /* log_debug("reading cout_pipe"); */
+        /* LOG_DEBUG(0, "reading cout_pipe"); */
         bytes_read = read(cout_pipe[0], &buffer[0], BUFSZ);
 #if defined(DEBUG_fastbuild)
-        if (_debug)
-            log_debug("outpipe bytes_read: %d", bytes_read);
+        if (opamc_debug)
+            LOG_DEBUG(0, "outpipe bytes_read: %d", bytes_read);
 #endif
         if (bytes_read > 0){
             /* drop trailing newline */
@@ -235,7 +239,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
                 buffer[bytes_read - 1] = '\0';
             bytes_read = read(cout_pipe[0], &buffer[0], BUFSZ);
             if (bytes_read > 0) {
-                log_error("cmd runner buffer too small! please file an issue.");
+                LOG_ERROR(0, "cmd runner buffer too small! please file an issue.", "");
                 close(cout_pipe[0]);
                 close(cerr_pipe[0]);
                 posix_spawn_file_actions_destroy(&action);
@@ -245,16 +249,16 @@ EXPORT char *run_cmd(char *executable, char **argv)
         close(cout_pipe[0]);
         close(cerr_pipe[0]);
         posix_spawn_file_actions_destroy(&action);
-        if (_debug)
-            log_debug("cmd returning: %s", buffer);
+        if (opamc_debug)
+            LOG_DEBUG(0, "cmd returning: %s", buffer);
         return strdup((char*)buffer);
     }
     else if (WIFSIGNALED(rc)) {
         // terminated due to receipt of a signal
-        log_error("WIFSIGNALED(rc)");
-        log_error("WTERMSIG: %d", WTERMSIG(rc));
+        LOG_ERROR(0, "WIFSIGNALED(rc)", "");
+        LOG_ERROR(0, "WTERMSIG: %d", WTERMSIG(rc));
 #ifdef WCOREDUMP
-        log_error("WCOREDUMP?: %d", WCOREDUMP(rc));
+        LOG_ERROR(0, "WCOREDUMP?: %d", WCOREDUMP(rc));
 #endif
         close(cout_pipe[0]);
         close(cerr_pipe[0]);
@@ -265,15 +269,15 @@ EXPORT char *run_cmd(char *executable, char **argv)
            be restarted. This macro can be true only if the
            wait call specified the WUNTRACED option or if the
            child process is being traced (see ptrace(2)). */
-        log_error("WIFSTOPPED(rc)");
-        log_error("WSTOPSIG: %d", WSTOPSIG(rc));
+        LOG_ERROR(0, "WIFSTOPPED(rc)", "");
+        LOG_ERROR(0, "WSTOPSIG: %d", WSTOPSIG(rc));
         close(cout_pipe[0]);
         close(cerr_pipe[0]);
         posix_spawn_file_actions_destroy(&action);
         return NULL;
     }
     /* fall-through should not happen */
-    log_error("%s:%d Fall-through - should not happen!",
+    LOG_ERROR(0, "%s:%d Fall-through - should not happen!",
               __FILE__, __LINE__);
     return NULL;
 }
