@@ -249,8 +249,10 @@ EXPORT char *run_cmd(char *executable, char **argv)
         close(cout_pipe[0]);
         close(cerr_pipe[0]);
         posix_spawn_file_actions_destroy(&action);
+#if defined(DEBUG_fastbuild)
         if (opamc_debug)
             LOG_DEBUG(0, "cmd returning: %s", buffer);
+#endif
         return strdup((char*)buffer);
     }
     else if (WIFSIGNALED(rc)) {
