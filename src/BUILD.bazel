@@ -32,7 +32,8 @@ cc_library(
     copts = COPTS + [
         "-I$(GENDIR)/$(@)/src",
         "-I$(@liblogc)/src",
-        "-I$(@uthash)/src"
+        "-I$(@uthash)/src",
+        "'-D$(MODULE_NAME)_VERSION=\"$(MODULE_VERSION)\"'"
     ],
     local_defines = DEFINES,
     linkopts = LINKOPTS,

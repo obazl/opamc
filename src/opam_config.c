@@ -30,6 +30,8 @@
 
 /* const char *errmsg = NULL; */
 
+const char *opamc_version = OPAMC_VERSION;
+
 extern bool verbose;
 extern int  verbosity;
 
