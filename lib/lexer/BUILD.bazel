@@ -40,7 +40,11 @@ cc_library(
         "@platforms//os:linux": ["-Wno-maybe-uninitialized"],
         "//conditions:default": []
     }),
-    defines = BASE_DEFINES,
+    defines = BASE_DEFINES + select({
+        ## for strdup, strndup:
+        "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
+        "//conditions:default": []
+    }),
     local_defines = select({
         ":yydebug-enabled": ["YYDEBUG"],
         "//conditions:default":   []

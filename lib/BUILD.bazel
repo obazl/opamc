@@ -35,7 +35,12 @@ cc_library(
     copts = COPTS + [
         "-I$(GENDIR)/$(@)/lib/internal",
     ],
-    defines = BASE_DEFINES,
+    defines = BASE_DEFINES + select({
+        ## for pselect stuff:
+        "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
+        "//conditions:default": []
+    }),
+
     local_defines = define_module_version(),
     linkopts = BASE_LINKOPTS,
     toolchains = TOOLCHAINS,

@@ -41,7 +41,11 @@ cc_library(
         # "-I$(@liblogc)/lib",
         # "-I$(@uthash)/lib",
     ],
-    defines = BASE_DEFINES,
+    defines = BASE_DEFINES + select({
+        ## for strdup, strndup:
+        "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
+        "//conditions:default": []
+    }),
     local_defines = select({
         ":lexdebug-enabled": ["LEXDEBUG"],
         "//conditions:default":   []
@@ -72,7 +76,11 @@ cc_library(
         "-I.", ## DO NOT REMOVE!!!
 
     ],
-    defines = select({
+    defines = BASE_DEFINES + select({
+        ## for strdup, strndup:
+        "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
+        "//conditions:default": []
+    }) + select({
         ":yydebug-enabled": ["YYDEBUG"],
         "//conditions:default":   []
     }) + select({
