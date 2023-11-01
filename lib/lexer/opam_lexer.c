@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include "log.h"
+#include "liblogc.h"
 
 /* #if EXPORT_INTERFACE */
 /* #include "utarray.h" */
@@ -11,6 +11,13 @@
 /* #endif */
 
 #include "opam_lexer.h"
+
+#if defined(PROFILE_fastbuild)
+#define DEBUG_LEVEL opamc_lexis_debug
+int  DEBUG_LEVEL;
+#define TRACE_FLAG opamc_lexis_trace
+bool TRACE_FLAG;
+#endif
 
 #if EXPORT_INTERFACE
 #define TOKEN_NAME(x) (char*)#x
@@ -106,6 +113,7 @@ bool is_empty(const char *s)
 /* EXPORT UT_array *opam_lex_file(char *fname) */
 EXPORT void opam_lex_file(char *fname)
 {
+    TRACE_ENTRY;
     log_set_quiet(false);
 
     /* UT_array *token_list; */
@@ -161,7 +169,7 @@ EXPORT void opam_lex_file(char *fname)
 
     while ( (tok = get_next_opam_token(lexer, &otok)) != 0 ) {
 #if defined(LEXDEBUG)
-        log_debug("mode: %d; token type: %d: %s",
+        LOG_DEBUG(0, "mode: %d; token type: %d: %s",
                   lexer->mode,
                   tok, opam_token_names[tok]);
         switch(tok) {
@@ -180,15 +188,16 @@ EXPORT void opam_lex_file(char *fname)
         case TERM_VARIDENT:
         case VARIDENT:
         case VERSION:
-            log_debug("\ts: %s", (char*)otok.s); break;
+            LOG_DEBUG(0, "\ts: %s", (char*)otok.s); break;
         /* default: */
-        /*     log_debug("other: %d", tok); break; */
+        /*     LOG_DEBUG(0, "other: %d", tok); break; */
         }
 #endif
         /* otok = malloc(sizeof(union opam_token)); */
     }
-    log_trace("opam_lexer: end of input");
+    LOG_TRACE(0, "opam_lexer: end of input", "");
     free(buffer);
 
     /* return token_list; */
+    TRACE_EXIT;
 }

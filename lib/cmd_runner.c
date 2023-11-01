@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 
 /* #include "ini.h" */
-#include "log.h"
+#include "liblogc.h"
 /* #if EXPORT_INTERFACE */
 /* #include "utarray.h" */
 #include "utstring.h"
@@ -31,15 +31,16 @@
 #include "cmd_runner.h"
 
 /* bool mibl_debug_cmd_runner = false; */
-/* #if defined(DEBUG_fastbuild) */
+/* #if defined(PROFILE_fastbuild) */
 /* /\* extern bool mibl_debug_deps; *\/ */
 /* #endif */
 
-#if defined(DEBUG_fastbuild)
-int  opamc_debug;
-bool opamc_trace;
+#if defined(PROFILE_fastbuild)
+#define DEBUG_LEVEL opamc_debug
+extern int  DEBUG_LEVEL;
+#define TRACE_FLAG opamc_trace
+extern bool TRACE_FLAG;
 #endif
-
 
 #if INTERFACE
 #define BUFSZ 4096 * 4
@@ -50,7 +51,7 @@ char buffer[BUFSZ];
 EXPORT char *run_cmd(char *executable, char **argv)
 {
     TRACE_ENTRY;
-#if defined(DEBUG_fastbuild)
+#if defined(PROFILE_fastbuild)
     if (opamc_debug) {
         char **ptr = argv;
         UT_string *tmp;
@@ -166,7 +167,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
         posix_spawn_file_actions_destroy(&action);
         return NULL;
     }
-#if defined(DEBUG_fastbuild)
+#if defined(PROFILE_fastbuild)
     if (opamc_debug)
         log_trace("waitpid for pid %d returned %d", pid, waitrc);
 #endif
@@ -174,7 +175,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
     // child exit OK
     if ( WIFEXITED(status) ) {
         // terminated normally by a call to _exit(2) or exit(3).
-#if defined(DEBUG_fastbuild)
+#if defined(PROFILE_fastbuild)
         if (opamc_debug) {
             log_trace("status: %d", status);
             log_trace("WIFEXITED(status): %d", WIFEXITED(status));
@@ -191,7 +192,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
             bytes_read = read(cerr_pipe[0], &buffer[0], BUFSZ);
             LOG_DEBUG(0, "readed %d bytes from cerr_pipe", bytes_read);
             if (bytes_read > 0) {
-                fprintf(stdout, "Read message: %s", buffer);
+                fprintf(stdout, "%s", buffer);
             }
             close(cout_pipe[0]);
             close(cerr_pipe[0]);
@@ -229,7 +230,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
 
         /* LOG_DEBUG(0, "reading cout_pipe"); */
         bytes_read = read(cout_pipe[0], &buffer[0], BUFSZ);
-#if defined(DEBUG_fastbuild)
+#if defined(PROFILE_fastbuild)
         if (opamc_debug)
             LOG_DEBUG(0, "outpipe bytes_read: %d", bytes_read);
 #endif
@@ -249,7 +250,7 @@ EXPORT char *run_cmd(char *executable, char **argv)
         close(cout_pipe[0]);
         close(cerr_pipe[0]);
         posix_spawn_file_actions_destroy(&action);
-#if defined(DEBUG_fastbuild)
+#if defined(PROFILE_fastbuild)
         if (opamc_debug)
             LOG_DEBUG(0, "cmd returning: %s", buffer);
 #endif

@@ -45,8 +45,8 @@ LINKOPTS      = [] #BASE_LINKOPTS
 #         "//conditions:default":   []
 #     }),
 #     deps = [
-#         "@liblogc//src:logc",
-#         "@uthash//src:uthash"
+#         "@liblogc//lib:logc",
+#         "@uthash//lib:uthash"
 #     ],
 #     visibility = ["//extender:__pkg__"]
 # )

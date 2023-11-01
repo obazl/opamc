@@ -13,7 +13,7 @@
 
 #include <unistd.h>
 
-#include "log.h"
+#include "liblogc.h"
 
 #include "utarray.h"
 #include "utstring.h"
@@ -22,7 +22,7 @@
 /* #include "findlib.h" */
 #include "bazel_test.h"
 
-#include "log.h"
+#include "liblogc.h"
 
 bool verbose;
 int  verbosity;

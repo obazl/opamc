@@ -1,4 +1,4 @@
-#include "log.h"
+#include "liblogc.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -14,7 +14,7 @@
 
 #include <unistd.h>
 
-#include "log.h"
+#include "liblogc.h"
 #include "utarray.h"
 #include "utstring.h"
 #include "utstring.h"
@@ -22,9 +22,20 @@
 #include "opamlexer.h"
 #include "lex_test.h"
 
+#if defined(PROFILE_fastbuild)
+#define DEBUG_LEVEL opamc_lexis_debug
+extern  int  DEBUG_LEVEL;
+#define TRACE_FLAG opamc_lexis_trace
+extern  bool TRACE_FLAG;
+#endif
+
 int main(int argc, char *argv[])
 {
     int opt;
+#if defined(PROFILE_fastbuild)
+    opamc_lexis_debug = 3;
+    opamc_lexis_trace = true;
+#endif
 
     UT_string *opam_file;
     utstring_new(opam_file);

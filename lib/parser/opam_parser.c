@@ -17,7 +17,7 @@
 
 #include <unistd.h>
 
-#include "log.h"
+#include "liblogc.h"
 #if EXPORT_INTERFACE
 #include "utarray.h"
 #include "uthash.h"
@@ -27,6 +27,13 @@
 #include "opam_parser.h"
 
 /* UT_string *package; */
+
+#if defined(PROFILE_fastbuild)
+#define DEBUG_LEVEL opamc_syntaxis_debug
+int  DEBUG_LEVEL;
+#define TRACE_FLAG opamc_syntaxis_trace
+bool TRACE_FLAG;
+#endif
 
 int line;
 int col;
@@ -51,6 +58,7 @@ struct opam_parse_state_s {
 EXPORT struct opam_parse_state_s *opam_parser_init(struct opam_lexer_s *lexer,
                                             struct opam_package_s *pkg)
 {
+    TRACE_ENTRY;
     struct opam_parse_state_s *ps = calloc(sizeof(struct opam_parse_state_s), 1);
     ps->lexer = lexer;
     ps->pkg = pkg;
@@ -68,6 +76,7 @@ EXPORT void opam_parse_state_free(opam_parse_state_s *parser)
 
 EXPORT struct opam_package_s *opam_parse_file(const char *fname)
 {
+    TRACE_ENTRY;
     log_set_quiet(false);
 
 #if defined(DEBUG_PARSERS)

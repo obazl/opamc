@@ -14,7 +14,7 @@
 #include<stdlib.h>
 #include <unistd.h>
 
-#include "log.h"
+#include "liblogc.h"
 #include "utarray.h"
 #include "utstring.h"
 #include "opamc.h"
@@ -24,6 +24,13 @@
 UT_string *build_file;
 
 UT_string *buffer;
+
+#if defined(PROFILE_fastbuild)
+#define DEBUG_LEVEL opamc_syntaxis_debug
+extern  int  DEBUG_LEVEL;
+#define TRACE_FLAG opamc_syntaxis_trace
+extern  bool TRACE_FLAG;
+#endif
 
 int compareFiles(FILE *file1, FILE *file2)
 {
@@ -53,6 +60,10 @@ int compareFiles(FILE *file1, FILE *file2)
 int main(int argc, char *argv[])
 {
     int opt;
+
+    /* opamc_trace = true; */
+    /* opamc_debug = 2; */
+
     utstring_new(build_file);
 
     while ((opt = getopt(argc, argv, "f:hv")) != -1) {

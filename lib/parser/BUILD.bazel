@@ -1,56 +1,54 @@
 load("@bazel_skylib//rules:common_settings.bzl",
      "bool_flag", "string_flag")
 
-load("@makeheaders//src:RULES.bzl", "makeheaders")
+load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
 load("@lemon//src:BUILD.bzl", "lemon")
 
 load("//config/cc:CONFIG.bzl",
-     "BASE_SRCS", "BASE_DEPS", "BASE_INCLUDE_PATHS",
-     "BASE_COPTS", "BASE_DEFINES", "BASE_LINKOPTS")
+     "BASE_COPTS",
+     "BASE_DEFINES",
+     "BASE_LOCAL_DEFINES",
+     "BASE_DEPS",
+     "BASE_LINKOPTS")
 
-SRCS          = BASE_SRCS
-COPTS         = BASE_COPTS + BASE_INCLUDE_PATHS
+COPTS         = BASE_COPTS
 DEPS          = BASE_DEPS
-DEFINES       = BASE_DEFINES + ["DEBUG_$(COMPILATION_MODE)"]
 LINKOPTS      = BASE_LINKOPTS
-TOOLCHAINS = ["//:repo_paths"]
+TOOLCHAINS = ["//:module_profiles"]
 
-exports_files(glob(["*.c"], exclude = ["macros_ndebug.h"]))
+exports_files(glob(["*.c"]))
 
 ################################################################
 ####    OPAM Parser
 ################################################################
 cc_library(
     name = "opam_parser",
-    srcs = SRCS + [
+    srcs = [
         "opam_parser.c",
         ":mkhdrs"
-        ],
-    # hdrs = [
-    #     "libopamparser.h",
-    # ],
-    copts = COPTS + [
-        # "-Wno-unused-variable", # in lemon-generated code
-
-        "-I$(GENDIR)/$(@)/src/parser",
-
-        "-I$(GENDIR)/$(@)/src/lexer",
-        "-I$(@liblogc)/src",
-        "-I$(@uthash)/src",
     ],
-    local_defines = DEFINES + select({
+    implementation_deps = DEPS + [
+        ":opam_syntaxis",
+        "//lib/lexer:opam_lexer",
+        # "@liblogc//lib:logc",
+        # "@uthash//lib:uthash"
+    ],
+    copts = COPTS + [
+        "-I$(GENDIR)/$(@)/lib/parser",
+
+        # "-Wno-unused-variable", # in lemon-generated code
+        # "-I$(GENDIR)/$(@)/lib/lexer",
+        # "-I$(@liblogc)/lib",
+        # "-I$(@uthash)/lib",
+    ],
+    defines = BASE_DEFINES,
+    local_defines = select({
         ":lexdebug-enabled": ["LEXDEBUG"],
         "//conditions:default":   []
     }),
-    deps = DEPS + [
-        ":opam_syntaxis",
-        "//src/lexer:opam_lexer",
-        # "@liblogc//src:logc",
-        "@uthash//src:uthash"
-    ],
     toolchains = TOOLCHAINS,
     visibility = [
-        "//src:__pkg__",
+        "//lib:__pkg__",
         "//extender:__pkg__",
         "//test:__subpackages__"
     ]
@@ -63,17 +61,16 @@ cc_library(
         "opam_syntaxis.c",
         ":mkhdrs"
     ],
-    deps = [
-        "@liblogc//src:logc",
-        "@uthash//src:uthash"
+    implementation_deps = [
+        "@liblogc//lib:logc",
+        "@uthash//lib:uthash"
     ],
     copts = COPTS + [
         "-Wno-unused-variable",  # from lemon-generated code
         "-Wno-unused-parameter",  # from lemon-generated code
 
         "-I.", ## DO NOT REMOVE!!!
-        "-I$(@liblogc)/src",
-        "-I$(@uthash)/src"
+
     ],
     defines = select({
         ":yydebug-enabled": ["YYDEBUG"],
@@ -95,7 +92,9 @@ lemon(
     ## NB: these are for lemon's %if, not cpp's #if
     ## fvf = filtered version formula
     ## fpf = filtered package formula
-    defines = select({
+    defines = [
+        # "PROFILE_fastbuild"
+        ] + select({
         ":yydebug-enabled": ["YYDEBUG"],
         "//conditions:default":   []
     }) + select({
@@ -114,7 +113,7 @@ lemon(
         ":yydebug-build-filter": ["YYDEBUG_BUILD_FILTER"],
         "//conditions:default":   []
     }),
-    visibility = ["//src/hdrs:__pkg__", "//src/lexer:__pkg__"]
+    visibility = ["//lib/hdrs:__pkg__", "//lib/lexer:__pkg__"]
 )
 
 ################################################################
@@ -128,13 +127,15 @@ makeheaders(
         "opam_package.c", ## ast node types, etc.
     ],
     additional_srcs = [
-        "//src/lexer:opamlexer.h",
-        "//src:ansi_colors.h",
+        "//lib/lexer:opamlexer.h",
     ] + select({
-        "//config/compilation_mode:fastbuild?": [
-            "//src:macros_debug.h"
+        "@makeheaders//compilation_mode:fastbuild": [
+            "@makeheaders//logging:ansi_colors.h",
+            "@makeheaders//logging:macros_debug.h"
         ],
-        "//conditions:default": ["//src:macros_ndebug.h"]
+        "//conditions:default": [
+            "@makeheaders//logging:macros_ndebug.h"
+        ]
     }),
     visibility = ["//visibility:public"]
 )
@@ -150,7 +151,7 @@ makeheaders(
 #         "opam_syntaxis.c",
 #         "opam_package.c",
 #         # "opam_lexis.c",
-#         # "//src/emitters:mkhdrs"
+#         # "//lib/emitters:mkhdrs"
 #     ],
 #     visibility = ["//visibility:public"]
 # )

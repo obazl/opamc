@@ -1,0 +1,25 @@
+################################################################
+# re2c takes a long time to build, so we only run it
+# when opam_lexis.re changes, which is rare.
+# to regenerate /lib/lexer/opam_lexis.c:
+# build this target and then manually copy output
+genrule(
+    name = "lexis",
+    outs  = ["opam_lexis.c"],
+    srcs = ["opam_lexis.re"],
+    tools = ["@re2c//:re2c"],
+    cmd   = "\n".join([
+        "for f in $(locations @re2c//:re2c)",
+        "do",
+        "    if [ -f $$f ]",
+        "    then",
+        "        if [ re2c = `basename $$f` -a -x $$f ]",
+        "        then",
+        "            break",
+        "        fi",
+        "    fi",
+        "done",
+        "$$f --conditions --tags -o $(@D)/opam_lexis.c $(location opam_lexis.re)",
+    ]),
+    visibility = ["//visibility:public"]
+)

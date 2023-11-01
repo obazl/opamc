@@ -1,15 +1,146 @@
-load("@makeheaders//src:RULES.bzl", "makeheaders")
+load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
 
 load("//config/cc:CONFIG.bzl",
-     "BASE_SRCS", "BASE_DEPS", "BASE_INCLUDE_PATHS",
-     "BASE_COPTS", "BASE_DEFINES", "BASE_LINKOPTS")
+     "BASE_DEPS",
+     "BASE_COPTS",
+     "BASE_DEFINES",
+     "BASE_LOCAL_DEFINES",
+     "BASE_LINKOPTS")
 
-SRCS          = BASE_SRCS
-COPTS         = BASE_COPTS + BASE_INCLUDE_PATHS
+COPTS         = BASE_COPTS
 DEPS          = BASE_DEPS
-DEFINES       = BASE_DEFINES
 LINKOPTS      = BASE_LINKOPTS
-TOOLCHAINS = ["//:test_repo_paths"]
+TOOLCHAINS = ["//:test_module_profiles"]
+
+##########
+cc_binary(
+    name  = "config_test",
+    linkstatic = 1,
+    srcs  = [
+        "config_test.c",
+        ":mkhdrs"
+    ],
+    copts = COPTS + [
+        # "-Isrc",
+        "-I$(GENDIR)/src",
+        "-I$(GENDIR)/test",
+        # "-I$(@liblogc)/src",
+        # "-I$(@uthash)/src"
+    ],
+    local_defines = BASE_LOCAL_DEFINES,
+    defines = BASE_DEFINES,
+    deps = [
+        "@liblogc//lib:logc",
+        "@uthash//lib:uthash",
+        "//lib:opamc"
+    ],
+    toolchains = TOOLCHAINS,
+)
+
+##########
+cc_binary(
+    name  = "lex_test",
+    linkstatic = 1,
+    srcs  = [
+        "lex_test.c",
+        ":mkhdrs",
+    ],
+    deps = [
+        "@liblogc//lib:logc",
+        "@uthash//lib:uthash",
+        "//lib/lexer:opam_lexer"
+    ],
+    copts = COPTS + [
+        "-I$(GENDIR)/$(@)/lib/lexer",
+        "-I$(GENDIR)/$(@)/test",
+        # "-I$(@liblogc)/src",
+        # "-I$(@uthash)/src"
+    ],
+    local_defines = BASE_LOCAL_DEFINES,
+    defines = BASE_DEFINES,
+    toolchains = TOOLCHAINS,
+)
+
+##########
+cc_binary(
+    name  = "parse_test",
+    linkstatic = 1,
+    srcs  = [
+        "parse_test.c",
+        ":mkhdrs"
+    ],
+    deps = [
+        "@liblogc//lib:logc",
+        "@uthash//lib:uthash",
+        "//lib:opamc"
+    ],
+    copts = COPTS + [
+        "-I$(GENDIR)/$(@)/src",
+        "-I$(GENDIR)/$(@)/test",
+        # "-I$(@liblogc)/src",
+        # "-I$(@uthash)/src"
+
+        # "-I$(GENDIR)/src",
+        # "-I$(GENDIR)/test",
+        # "-Iexternal/liblogc~{}/src".format(LIBLOGC_VERSION),
+        # "-Iexternal/uthash~{}/src".format(UTHASH_VERSION)
+    ],
+    local_defines = BASE_LOCAL_DEFINES,
+    defines = BASE_DEFINES,
+    toolchains = TOOLCHAINS,
+)
+
+################################################################
+# cc_binary(
+#     name  = "walk_test",
+#     linkstatic = 1,
+#     srcs  = [
+#         "walk_test.c",
+#         "walk_test.h",
+#         # "//lib:liblogc.h"
+#     ],
+#     copts = COPTS + [
+
+#         "-Isrc",
+#         "-Itest",
+
+#         "-I$(GENDIR)/src",
+#         "-I$(GENDIR)/src/opam",
+#         "-I$(GENDIR)/test/opam",
+
+#         "-Ivendored/uthash",
+
+#         "-Iexternal/mibl/src",
+#         "-I$(GENDIR)/external/mibl/src",
+
+#         "-Iexternal/mibl/opam/test",
+#         "-I$(GENDIR)/external/mibl/test/opam",
+
+#         "-Iexternal/libs7/src",
+#     ],
+#     defines = ["DEBUG", "TRACING"],
+#     deps = [
+#         "//lib:treewalker",
+#         # "//lib:opam_lexer"
+#     ],
+# )
+
+################################################################
+makeheaders(
+    name = "mkhdrs",
+    hdrs_srcs = [
+        "bazel_test.c",
+        "config_test.c",
+        # "crawl_test.c",
+        "lex_test.c",
+        "parse_test.c",
+    ],
+    additional_srcs = [
+        # "//bazel:bazel_map_reduce.c",
+    ],
+    visibility = ["//visibility:public"]
+)
+
 
 ##########
 # cc_binary(
@@ -20,8 +151,8 @@ TOOLCHAINS = ["//:test_repo_paths"]
 #         ":mkhdrs"
 #     ],
 #     deps = [
-#         "@liblogc//src:logc",
-#         "@uthash//src:uthash",
+#         "@liblogc//lib:logc",
+#         "@uthash//lib:uthash",
 #         # "@findlibc//src:findlibc",
 #         # "//bazel"
 #     ],
@@ -54,135 +185,10 @@ TOOLCHAINS = ["//:test_repo_paths"]
 #     ],
 #     local_defines = DEFINES,
 #     deps = [
-#         "@liblogc//src:logc",
-#         "@uthash//src:uthash",
+#         "@liblogc//lib:logc",
+#         "@uthash//lib:uthash",
 #         # "@libfindlib//src:findlib"
 #     ],
 #     toolchains = TOOLCHAINS,
 # )
 
-##########
-cc_binary(
-    name  = "config_test",
-    linkstatic = 1,
-    srcs  = [
-        "config_test.c",
-        ":mkhdrs"
-    ],
-    copts = COPTS + [
-        # "-Isrc",
-        "-I$(GENDIR)/src",
-        "-I$(GENDIR)/test",
-        "-I$(@liblogc)/src",
-        "-I$(@uthash)/src"
-    ],
-    defines = ["DEBUG", "TRACING"],
-    deps = [
-        "@liblogc//src:logc",
-        "@uthash//src:uthash",
-        "//src:opamc"
-    ],
-    toolchains = TOOLCHAINS,
-)
-
-##########
-cc_binary(
-    name  = "lex_test",
-    linkstatic = 1,
-    srcs  = [
-        "lex_test.c",
-        ":mkhdrs",
-    ],
-    deps = [
-        "@liblogc//src:logc",
-        "@uthash//src:uthash",
-        "//src/lexer:opam_lexer"
-    ],
-    copts = COPTS + [
-        "-I$(GENDIR)/$(@)/src/lexer",
-        "-I$(GENDIR)/$(@)/test",
-        "-I$(@liblogc)/src",
-        "-I$(@uthash)/src"
-    ],
-    defines = ["DEBUG", "TRACING"],
-    toolchains = TOOLCHAINS,
-)
-
-##########
-cc_binary(
-    name  = "parse_test",
-    linkstatic = 1,
-    srcs  = [
-        "parse_test.c",
-        ":mkhdrs"
-    ],
-    deps = [
-        "@liblogc//src:logc",
-        "@uthash//src:uthash",
-        "//src:opamc"
-    ],
-    copts = COPTS + [
-        "-I$(GENDIR)/$(@)/src",
-        "-I$(GENDIR)/$(@)/test",
-        "-I$(@liblogc)/src",
-        "-I$(@uthash)/src"
-
-        # "-I$(GENDIR)/src",
-        # "-I$(GENDIR)/test",
-        # "-Iexternal/liblogc~{}/src".format(LIBLOGC_VERSION),
-        # "-Iexternal/uthash~{}/src".format(UTHASH_VERSION)
-    ],
-    defines = ["DEBUG", "TRACING"],
-    toolchains = TOOLCHAINS,
-)
-
-################################################################
-# cc_binary(
-#     name  = "walk_test",
-#     linkstatic = 1,
-#     srcs  = [
-#         "walk_test.c",
-#         "walk_test.h",
-#         # "//src:log.h"
-#     ],
-#     copts = COPTS + [
-
-#         "-Isrc",
-#         "-Itest",
-
-#         "-I$(GENDIR)/src",
-#         "-I$(GENDIR)/src/opam",
-#         "-I$(GENDIR)/test/opam",
-
-#         "-Ivendored/uthash",
-
-#         "-Iexternal/mibl/src",
-#         "-I$(GENDIR)/external/mibl/src",
-
-#         "-Iexternal/mibl/opam/test",
-#         "-I$(GENDIR)/external/mibl/test/opam",
-
-#         "-Iexternal/libs7/src",
-#     ],
-#     defines = ["DEBUG", "TRACING"],
-#     deps = [
-#         "//src:treewalker",
-#         # "//src:opam_lexer"
-#     ],
-# )
-
-################################################################
-makeheaders(
-    name = "mkhdrs",
-    hdrs_srcs = [
-        "bazel_test.c",
-        "config_test.c",
-        # "crawl_test.c",
-        "lex_test.c",
-        "parse_test.c",
-    ],
-    additional_srcs = [
-        # "//bazel:bazel_map_reduce.c",
-    ],
-    visibility = ["//visibility:public"]
-)

@@ -1,19 +1,20 @@
 load("@bazel_skylib//rules:common_settings.bzl",
      "bool_flag", "string_flag")
 
-load("@makeheaders//src:RULES.bzl", "makeheaders")
+load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
 load("@lemon//src:BUILD.bzl", "lemon")
 
 load("//config/cc:CONFIG.bzl",
-     "BASE_SRCS", "BASE_DEPS", "BASE_INCLUDE_PATHS",
-     "BASE_COPTS", "BASE_DEFINES", "BASE_LINKOPTS")
+     "BASE_COPTS",
+     "BASE_DEFINES",
+     "BASE_LOCAL_DEFINES",
+     "BASE_DEPS",
+     "BASE_LINKOPTS")
 
-SRCS          = BASE_SRCS
-COPTS         = BASE_COPTS + BASE_INCLUDE_PATHS
+COPTS         = BASE_COPTS
 DEPS          = BASE_DEPS
-DEFINES       = BASE_DEFINES + ["DEBUG_$(COMPILATION_MODE)"]
 LINKOPTS      = BASE_LINKOPTS
-TOOLCHAINS = ["//:repo_paths"]
+TOOLCHAINS = ["//:module_profiles"]
 
 # exports_files(glob(["*.c"], exclude = ["macors_ndebug.h"]))
 
@@ -26,19 +27,21 @@ cc_library(
         ":mkhdrs"
     ],
     hdrs = ["opamlexer.h"],
-    deps = DEPS + ["@uthash//src:uthash"],
+    implementation_deps = DEPS,
+    deps = ["@uthash//lib:uthash"],
     copts = COPTS + [
         "-Wno-unused-parameter", # macos
 
-        "-I$(GENDIR)/$(@)/src/lexer",
-        "-I$(@liblogc)/src",
-        "-I$(@uthash)/src"
+        "-I$(GENDIR)/$(@)/lib/lexer",
+        # "-I$(@liblogc)/lib",
+        # "-I$(@uthash)/lib"
     ] + select({
         # suppress: lexis.re:355:50: error: 'yyt2' may be used uninitialized in this function [-Werror=maybe-uninitialized]
         "@platforms//os:linux": ["-Wno-maybe-uninitialized"],
         "//conditions:default": []
     }),
-    local_defines = DEFINES + select({
+    defines = BASE_DEFINES,
+    local_defines = select({
         ":yydebug-enabled": ["YYDEBUG"],
         "//conditions:default":   []
     }) + select({
@@ -59,35 +62,8 @@ cc_library(
     }),
     toolchains = TOOLCHAINS,
     visibility = ["//test:__subpackages__",
-                  "//src/parser:__pkg__"]
+                  "//lib/parser:__pkg__"]
 )
-
-################################################################
-# re2c takes a long time to build, so we only run it
-# when opam_lexis.re changes, which is rare.
-# to regenerate opam_lexis.c: delete src/opam_lexis.c
-# and uncomment this target. Once the new version is copacetic,
-# copy it into the src tree and comment this out.
-# genrule(
-#     name = "gen_opam_lexis",
-#     outs  = ["opam_lexis.c"],
-#     srcs = ["opam_lexis.re"],
-#     tools = ["@re2c//:re2c"],
-#     cmd   = "\n".join([
-#         "for f in $(locations @re2c//:re2c)",
-#         "do",
-#         "    if [ -f $$f ]",
-#         "    then",
-#         "        if [ re2c = `basename $$f` -a -x $$f ]",
-#         "        then",
-#         "            break",
-#         "        fi",
-#         "    fi",
-#         "done",
-#         "$$f --conditions --tags -o $(@D)/opam_lexis.c $(location opam_lexis.re)",
-#     ]),
-#     visibility = ["//visibility:public"]
-# )
 
 ################################################################
 makeheaders(
@@ -101,12 +77,15 @@ makeheaders(
         # "opam_package.c", ## ast node types, etc.
     ],
     additional_srcs = [
-        "//src/parser:opam_syntaxis.c", ## defines token_type constants
+        "//lib/parser:opam_syntaxis.c", ## defines token_type constants
     ] + select({
-        "//config/profile:dev?": [
-            "//src:ansi_colors.h", "//src:macros_debug.h"
+        "@makeheaders//compilation_mode:fastbuild": [
+            "@makeheaders//logging:ansi_colors.h",
+            "@makeheaders//logging:macros_debug.h"
         ],
-        "//conditions:default": ["//src:macros_ndebug.h"]
+        "//conditions:default": [
+            "@makeheaders//logging:macros_ndebug.h"
+        ]
     }),
     visibility = ["//visibility:public"]
 )
@@ -122,10 +101,10 @@ makeheaders(
         # "opam_parser.c",
         # "opam_package.c",
         # "opam_syntaxis.c",
-        # "//src/emitters:mkhdrs"
+        # "//lib/emitters:mkhdrs"
         ],
     additional_srcs = [
-        "//src/parser:opam_syntaxis.c", ## defines token_type constants
+        "//lib/parser:opam_syntaxis.c", ## defines token_type constants
         ],
     visibility = ["//visibility:public"]
 )

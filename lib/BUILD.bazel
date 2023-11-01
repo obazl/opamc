@@ -1,0 +1,128 @@
+load("@bazel_skylib//rules:common_settings.bzl",
+     "bool_flag", "string_flag")
+
+load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
+load("@lemon//src:BUILD.bzl", "lemon")
+
+load("//config/cc:CONFIG.bzl",
+     "BASE_DEPS",
+     "BASE_COPTS",
+     "BASE_DEFINES",
+     "BASE_LINKOPTS",
+     "define_module_version")
+
+COPTS         = BASE_COPTS
+DEPS          = BASE_DEPS
+# LINKOPTS      = BASE_LINKOPTS
+TOOLCHAINS = ["//:module_profiles"]
+
+# exports_files(["macros_debug.h", "macros_ndebug.h",
+#                "ansi_colors.h"])
+# exports_files(glob(["*.c"], exclude = ["macros_ndebug.h"]))
+
+###########
+cc_library(
+    name = "opamc",
+    srcs = ["opam_config.c", "cmd_runner.c", ":mkhdrs"],
+    hdrs = ["include/opamc.h"],
+    includes = ["include"],
+    # deps = [
+    implementation_deps = [
+        "@liblogc//lib:logc",
+        "@uthash//lib:uthash",
+        "//lib/parser:opam_parser",
+    ],
+    copts = COPTS + [
+        "-I$(GENDIR)/$(@)/lib/internal",
+    ],
+    defines = BASE_DEFINES,
+    local_defines = define_module_version(),
+    linkopts = BASE_LINKOPTS,
+    toolchains = TOOLCHAINS,
+    visibility = ["//visibility:public"]
+)
+
+################################################################
+makeheaders(
+    name = "mkhdrs",
+    outdir = "internal",
+    hdrs_srcs = [
+        "opam_config.c",
+        "cmd_runner.c",
+        "//lib/parser:opam_parser.c",
+        # "//lib/parser:opam_syntaxis.c", ## defines token_type constants
+        "//lib/parser:opam_package.c", ## ast node types, etc.
+        # "opam_lexer.c",
+        # "opam_lexis.c",
+    ],
+    additional_srcs = [
+        "//lib/lexer:opamlexer.h",
+        "@makeheaders//logging:ansi_colors.h",
+    ] + select({
+        "@makeheaders//compilation_mode:fastbuild": [
+            "@makeheaders//logging:macros_debug.h"
+        ],
+        "//conditions:default": [
+            "@makeheaders//logging:macros_ndebug.h"
+        ]
+    }),
+    visibility = ["//visibility:public"]
+)
+
+makeheaders(
+    name = "mkhdrs_export",
+    out = "include/opamc.h",
+    export_interface = True,
+    hdrs_srcs = [
+        "opam_config.c",
+        # "//lib/lexer:opam_lexer.c",
+        "//lib/parser:opam_parser.c",
+        "//lib/parser:opam_package.c",
+        # "opam_lexis.c",
+        # "opam_syntaxis.c",
+        # "//lib/emitters:mkhdrs"
+    ],
+    visibility = ["//visibility:public"]
+)
+
+################################################################
+## enable parser debugging: --//bootstrap:yydebug
+bool_flag(name = "yydebug", build_setting_default = 0)
+config_setting(name = "yydebug-enabled", flag_values = {":yydebug": "True"})
+config_setting(name = "yydebug-disabled", flag_values = {":yydebug": "False"})
+bool_flag(name = "yydebug-exit-on-error", build_setting_default = 0)
+config_setting(name = "yydebug-exit-on-error-enabled",
+               flag_values = {":yydebug-exit-on-error": "True"})
+
+bool_flag(name = "yytrace", build_setting_default = 0)
+config_setting(name = "yytrace-enabled", flag_values = {":yytrace": "True"})
+config_setting(name = "yytrace-disabled", flag_values = {":yytrace": "False"})
+
+## debug parse rules
+string_flag(name = "yydebug-rules", build_setting_default = "")
+config_setting(name = "yydebug-fpf",
+               flag_values = {":yydebug-rules": "fpf"})
+config_setting(name = "yydebug-fvf",
+               flag_values = {":yydebug-rules": "fvf"})
+config_setting(name = "yydebug-filter",
+               flag_values = {":yydebug-rules": "filter"})
+config_setting(name = "yydebug-build-filter",
+               flag_values = {":yydebug-rules": "build-filter"})
+
+## enable lexer debugging: --//bootstrap:lexdebug
+bool_flag(name = "lexdebug", build_setting_default = 0)
+config_setting(name = "lexdebug-enabled", flag_values = {":lexdebug": "True"})
+config_setting(name = "lexdebug-disabled", flag_values = {":lexdebug": "False"})
+
+string_flag(name = "lexdebug-rules", build_setting_default = "")
+config_setting(name = "lexdebug-version",
+               flag_values = {":lexdebug-rules": "version"})
+config_setting(name = "lexdebug-fpf",
+               flag_values = {":lexdebug-rules": "fpf"})
+config_setting(name = "lexdebug-fvf",
+               flag_values = {":lexdebug-rules": "fvf"})
+config_setting(name = "lexdebug-filter",
+               flag_values = {":lexdebug-rules": "filter"})
+config_setting(name = "lexdebug-build-filter",
+               flag_values = {":lexdebug-rules": "build-filter"})
+

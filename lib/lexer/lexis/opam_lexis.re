@@ -20,7 +20,7 @@
 
 #include <sys/errno.h>
 
-#include "log.h"
+#include "liblogc.h"
 #include "opam_lexis.h"
 
 #if EXPORT_INTERFACE
@@ -35,6 +35,13 @@ int opam_curr_tag = 0;
 
 /* enable start conditions */
 /*!types:re2c */
+
+#if defined(PROFILE_fastbuild)
+#define DEBUG_LEVEL opamc_lexis_debug
+int  DEBUG_LEVEL;
+#define TRACE_FLAG opamc_lexis_trace
+bool TRACE_FLAG;
+#endif
 
 #if EXPORT_INTERFACE
 #include <stdbool.h>
@@ -94,38 +101,38 @@ EXPORT void opam_lexer_free(opam_lexer_s *lexer)
 EXPORT int get_next_opam_token(struct opam_lexer_s *lexer, union opam_token_u *otok)
 {
 #if defined(LEXDEBUG_FVF)
-    log_debug("yycinit: %d, yycdepends: %d, yycfpf %d, yycfvf: %d",
+    LOG_DEBUG(0, "yycinit: %d, yycdepends: %d, yycfpf %d, yycfvf: %d",
               yycinit, yycdepends, yycfpf, yycfvf);
     // only set lexer->mode on initial call
     static bool start = true;
     if (start) {
         lexer->mode = yycfpf;
-        log_debug("start mode: %d", lexer->mode);
+        LOG_DEBUG(0, "start mode: %d", lexer->mode);
         start = false;
     }
 #elif defined (LEXDEBUG_FPF)
-    log_debug("yycinit: %d, yycdepends: %d, yycfpf %d, yycfvf: %d",
+    LOG_DEBUG(0, "yycinit: %d, yycdepends: %d, yycfpf %d, yycfvf: %d",
               yycinit, yycdepends, yycfpf, yycfvf);
     static bool start = true;
     if (start) {
         lexer->mode = yycfpf;
-        log_debug("start mode: %d", lexer->mode);
+        LOG_DEBUG(0, "start mode: %d", lexer->mode);
         start = false;
     }
 #elif defined (LEXDEBUG_FILTERS)
-    log_debug("yycinit: %d, yycdepends: %d, yycfpf %d, yycfvf: %d",
+    LOG_DEBUG(0, "yycinit: %d, yycdepends: %d, yycfpf %d, yycfvf: %d",
               yycinit, yycdepends, yycfpf, yycfvf);
     static bool start = true;
     if (start) {
         lexer->mode = yycfvf;
-        log_debug("start mode: %d", lexer->mode);
+        LOG_DEBUG(0, "start mode: %d", lexer->mode);
         start = false;
     }
 #else
     /* static bool start = true; */
     /* if (start) { */
     /*     lexer->mode = yycinit; */
-    /*     log_debug("start mode: %d", lexer->mode); */
+    /*     LOG_DEBUG(0, "start mode: %d", lexer->mode); */
     /*     start = false; */
     /* } */
 #endif
@@ -216,7 +223,7 @@ loop:
 
         <*> @s1 ("=" | "!=" | "<" | "<=" | ">" | ">=") @s2 {
             otok->s = strndup(s1, (size_t)(s2-s1));
-            log_debug("mode %d: RELOP %s", lexer->mode, otok->s);
+            LOG_DEBUG(0, "mode %d: RELOP %s", lexer->mode, otok->s);
             return RELOP;
         }
         <*> "!" { return BANG; }
@@ -258,32 +265,32 @@ loop:
         }
 
         <init> "build" => build {
-            log_debug("build, mode: %d", lexer->mode);
+            LOG_DEBUG(0, "build, mode: %d", lexer->mode);
             return BUILD;
         }
         <init> "install" => build {
-            log_debug("install, mode: %d", lexer->mode);
+            LOG_DEBUG(0, "install, mode: %d", lexer->mode);
             return INSTALL;
         }
         <init> "run-test" => build {
-            log_debug("run-test, mode: %d", lexer->mode);
+            LOG_DEBUG(0, "run-test, mode: %d", lexer->mode);
             return RUN_TEST;
         }
 
         <build> ":" { return COLON; }
         <build> "[" => buildlist {
-            log_debug("<build> lbracket, mode %d", lexer->mode);
+            LOG_DEBUG(0, "<build> lbracket, mode %d", lexer->mode);
             return LBRACKET; }
         <build> "]" => init { return RBRACKET; }
         <buildlist> "[" => term {
-            log_debug("<buildlist> lbracket, mode %d", lexer->mode);
+            LOG_DEBUG(0, "<buildlist> lbracket, mode %d", lexer->mode);
             return LBRACKET; }
         <buildlist> "]" => init {
             // always marks end of build fld so back to <init>
             return RBRACKET;
         }
         <buildlist> "{" => termlist_filter {
-            log_debug("<buildlist> lbrace mode %d", lexer->mode);
+            LOG_DEBUG(0, "<buildlist> lbrace mode %d", lexer->mode);
             return LBRACE;
         }
 
@@ -297,14 +304,14 @@ loop:
                 return TERM_VARIDENT;
         }
         <term> "{" => term_filter {
-                log_debug("<term> lbrace mode %d", lexer->mode);
+                LOG_DEBUG(0, "<term> lbrace mode %d", lexer->mode);
                 return LBRACE; }
         <term_filter> "}" => term {
-                log_debug("<term_filter> rbrace mode %d", lexer->mode);
+                LOG_DEBUG(0, "<term_filter> rbrace mode %d", lexer->mode);
                 return RBRACE; }
 
         <termlist_filter> "}" => buildlist {
-                log_debug("<termlist_filter> rbrace mode %d", lexer->mode);
+                LOG_DEBUG(0, "<termlist_filter> rbrace mode %d", lexer->mode);
                 return RBRACE; }
 
         <term> "[" { return LBRACKET; }
@@ -328,7 +335,7 @@ loop:
         <fpf> ")" => init { return RPAREN; }
         <fpf> "]" => init { return RBRACKET; }
         <fpf> "{" => fvf {
-            log_debug("mode %d: LBRACE", lexer->mode);
+            LOG_DEBUG(0, "mode %d: LBRACE", lexer->mode);
             return LBRACE;
         }
 
@@ -418,7 +425,7 @@ loop:
         }
 
         <*> end       {
-            log_debug("lexing completed");
+            LOG_DEBUG(0, "lexing completed", "");
             return 0;
         }
 

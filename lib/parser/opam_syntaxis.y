@@ -11,7 +11,7 @@
 #include "utarray.h"
 #include "uthash.h"
 
-#include "log.h"
+#include "liblogc.h"
 
 #if INTERFACE
 #ifndef YYMALLOCARGTYPE
@@ -19,7 +19,14 @@
 #endif
 #endif
 
+#define DEBUG_LEVEL opamc_syntaxis_debug
+extern int  DEBUG_LEVEL;
+#define TRACE_FLAG opamc_syntaxis_trace
+extern bool TRACE_FLAG;
 }
+
+/* %ifdef PROFILE_fastbuild */
+/* %endif */
 
 /* opam_parse_state->pkg->entries is a uthash f bindings. parse rules
 update it directly */
@@ -137,7 +144,7 @@ update it directly */
 }
 
 %parse_accept {
-    log_trace("Parsing complete");
+    LOG_TRACE(0, "Parsing complete", "");
 }
 
 %parse_failure {
@@ -149,33 +156,33 @@ update it directly */
 
 package ::= bindings . {
 #if YYDEBUG
-    log_debug("PACKAGE");
-    log_debug(" bindings ct: %d",
+    LOG_DEBUG(0, "PACKAGE", "");
+    LOG_DEBUG(0, " bindings ct: %d",
               HASH_CNT(hh, opam_parse_state->pkg->entries));
 #endif
 }
 
 %ifdef YYDEBUG_BUILD_FILTER
 package ::= build_filter . {
-    log_debug("START build_filter");
+    LOG_DEBUG(0, "START build_filter", "");
 }
 %endif
 
 %ifdef YYDEBUG_FILTER
 package ::= filter . {
-    log_debug("START filter");
+    LOG_DEBUG(0, "START filter", "");
 }
 %endif
 
 %ifdef YYDEBUG_FPF
 package ::= filtered_package_formulas . {
-    log_debug("START filtered_package_formulas");
+    LOG_DEBUG(0, "START filtered_package_formulas");
 }
 %endif
 
 %ifdef YYDEBUG_FVF
 package ::= fvf_expr . {
-    log_debug("START fvf");
+    LOG_DEBUG(0, "START fvf");
     /* printf("    bindings ct: %d\n", */
     /*        HASH_CNT(hh, opam_parse_state->pkg->entries)); */
 }
@@ -190,7 +197,7 @@ bindings ::= binding . {
 
 bindings(Bindings_lhs) ::= bindings(Bindings_rhs) binding . {
 #if YYDEBUG
-    log_debug("BINDINGS ct: %d",
+    LOG_DEBUG(0, "BINDINGS ct: %d",
            HASH_CNT(hh, opam_parse_state->pkg->entries));
 #endif
     /* no need to do anything, opam_parse_state->pkg->entries already
@@ -203,7 +210,7 @@ bindings(Bindings_lhs) ::= bindings(Bindings_rhs) binding . {
 
 binding(Binding) ::= KEYWORD(Keyword) COLON STRING(String) . {
 #if YYDEBUG
-    log_debug("BINDING: %s: %s", Keyword.s, String.s);
+    LOG_DEBUG(0, "BINDING: %s: %s", Keyword.s, String.s);
 #endif
     /* create a binding and add it to the pkg hashmap */
     Binding = calloc(sizeof(struct opam_binding_s), 1);
@@ -217,7 +224,7 @@ binding(Binding) ::= KEYWORD(Keyword) COLON STRING(String) . {
 
 binding(Binding) ::= KEYWORD(Keyword) COLON string3(String) . {
 #if YYDEBUG
-    log_debug("BINDING: %s: %s", Keyword.s, String.s);
+    LOG_DEBUG(0, "BINDING: %s: %s", Keyword.s, String.s);
 #endif
     /* create a binding and add it to the pkg hashmap */
     Binding = calloc(sizeof(struct opam_binding_s), 1);
@@ -231,7 +238,7 @@ binding(Binding) ::= KEYWORD(Keyword) COLON string3(String) . {
 
 binding(Binding) ::= KEYWORD(Keyword) COLON LBRACKET stringlist(Stringlist) RBRACKET . {
 #if YYDEBUG
-    log_debug("BINDING stringlist %s, ct: %d",
+    LOG_DEBUG(0, "BINDING stringlist %s, ct: %d",
            Keyword.s, utarray_len(Stringlist));
 #endif
     /* create a binding and add it to the pkg hashmap */
@@ -243,7 +250,7 @@ binding(Binding) ::= KEYWORD(Keyword) COLON LBRACKET stringlist(Stringlist) RBRA
                     opam_parse_state->pkg->entries,
                     Binding->name, strlen(Binding->name), Binding);
 #if YYDEBUG
-    log_debug("BINDING stringlist val ct: %d",
+    LOG_DEBUG(0, "BINDING stringlist val ct: %d",
            utarray_len((UT_array*)Binding->val));
 #endif
 }
@@ -255,7 +262,7 @@ binding(Binding) ::= KEYWORD(Keyword) COLON LBRACKET stringlist(Stringlist) RBRA
 binding(Binding) ::=
     BUILD COLON LBRACKET term_grammar RBRACKET . {
 #if YYDEBUG
-        log_debug("BINDING build");
+        LOG_DEBUG(0, "BINDING build");
 #endif
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = strndup("build", 5);
@@ -269,7 +276,7 @@ binding(Binding) ::=
 binding(Binding) ::=
     INSTALL COLON LBRACKET term_grammar RBRACKET . {
 #if YYDEBUG
-        log_debug("BINDING install");
+        LOG_DEBUG(0, "BINDING install");
 #endif
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = strndup("install", 7);
@@ -283,7 +290,7 @@ binding(Binding) ::=
 binding(Binding) ::=
     RUN_TEST COLON LBRACKET term_grammar RBRACKET . {
 #if YYDEBUG
-        log_debug("BINDING run-test");
+        LOG_DEBUG(0, "BINDING run-test");
 #endif
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = strndup("run-test", 8);
@@ -295,75 +302,75 @@ binding(Binding) ::=
 }
 
 term_grammar ::= . {
-    log_debug("term_grammar null");
+    LOG_DEBUG(0, "term_grammar null", "");
 }
 
 term_grammar ::= term_grammar build_cmd . {
-    log_debug("term_grammar list");
+    LOG_DEBUG(0, "term_grammar list", "");
 }
 
 build_cmd ::= LBRACKET build_terms RBRACKET . {
-    log_debug("build_cmd");
+    LOG_DEBUG(0, "build_cmd", "");
 }
 
 build_cmd ::= LBRACKET build_terms RBRACKET build_filter . {
-    log_debug("build_cmd filtered");
+    LOG_DEBUG(0, "build_cmd filtered", "");
 }
 
 build_terms ::= . {
-    log_debug("build_terms");
+    LOG_DEBUG(0, "build_terms", "");
 }
 
 /* build_terms ::= build_terms TERM_STRING . { */
-/*     log_debug("build_terms TERM_STRING"); */
+/*     LOG_DEBUG(0, "build_terms TERM_STRING"); */
 /* } */
 
 build_terms ::= build_terms build_term . {
-    log_debug("build_terms build_term");
+    LOG_DEBUG(0, "build_terms build_term", "");
 }
 
 build_term ::= TERM_STRING . {
-    log_debug("build_term TERM_VARIDENT");
+    LOG_DEBUG(0, "build_term TERM_VARIDENT", "");
 }
 
 build_term ::= TERM_STRING build_filter . {
-    log_debug("build_term TERM_STRING build_term");
+    LOG_DEBUG(0, "build_term TERM_STRING build_term", "");
 }
 
 build_term ::= TERM_VARIDENT . {
-    log_debug("build_term TERM_VARIDENT");
+    LOG_DEBUG(0, "build_term TERM_VARIDENT", "");
 }
 
 build_term ::= TERM_VARIDENT build_filter . {
-    log_debug("build_term TERM_VARIDENT build_term");
+    LOG_DEBUG(0, "build_term TERM_VARIDENT build_term", "");
 }
 
 build_filter ::= LBRACE FILTER RBRACE . {
-    log_debug("build_filter");
+    LOG_DEBUG(0, "build_filter", "");
 }
 
 build_filter ::= LBRACE build_filter_expr RBRACE . {
-    log_debug("build_filter");
+    LOG_DEBUG(0, "build_filter", "");
 }
 
 build_filter_expr ::= STRING . {
-    log_debug("build_filter");
+    LOG_DEBUG(0, "build_filter", "");
 }
 
 build_filter_expr ::= VARIDENT . {
-    log_debug("build_filter");
+    LOG_DEBUG(0, "build_filter", "");
 }
 
 build_filter_expr ::= build_filter_expr LOGOP build_filter_expr . {
-    log_debug("build_filter");
+    LOG_DEBUG(0, "build_filter", "");
 }
 
 build_filter_expr ::= build_filter_expr RELOP build_filter_expr . {
-    log_debug("build_filter");
+    LOG_DEBUG(0, "build_filter", "");
 }
 
 /* build_filter_expr ::= FILTER . { */
-/*     log_debug("build_filter"); */
+/*     LOG_DEBUG(0, "build_filter"); */
 /* } */
 
 /****************************************************************/
@@ -372,7 +379,7 @@ build_filter_expr ::= build_filter_expr RELOP build_filter_expr . {
 binding(Binding) ::=
     DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET . {
 #if YYDEBUG
-        log_debug("BINDING depends");
+        LOG_DEBUG(0, "BINDING depends", "");
 #endif
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = strndup("depends", 7);
@@ -386,7 +393,7 @@ binding(Binding) ::=
 binding(Binding) ::=
     CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET . {
 #if YYDEBUG
-        log_debug("BINDING conflicts");
+        LOG_DEBUG(0, "BINDING conflicts");
 #endif
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = strndup("conflicts", 9);
@@ -399,7 +406,7 @@ binding(Binding) ::=
 
 stringlist(Stringlist) ::= STRING(String) . {
 #if YYDEBUG
-    log_debug("STRINGLIST single: %s", String.s);
+    LOG_DEBUG(0, "STRINGLIST single: %s", String.s);
 #endif
     utarray_new(Stringlist, &ut_str_icd);
     utarray_push_back(Stringlist, &String.s);
@@ -407,7 +414,7 @@ stringlist(Stringlist) ::= STRING(String) . {
 
 stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
 #if YYDEBUG
-    log_debug("STRINGLIST multiple, ct: %d; new: %s",
+    LOG_DEBUG(0, "STRINGLIST multiple, ct: %d; new: %s",
            utarray_len(Stringlist), String.s);
 #endif
     utarray_push_back(Stringlist, &String.s);
@@ -430,30 +437,30 @@ stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
 
     filtered_package_formulas ::= . {
 #if YYDEBUG
-        log_debug("filtered_package_formulas: null");
+        LOG_DEBUG(0, "filtered_package_formulas: null");
 #endif
     }
 
     filtered_package_formulas ::= filtered_package_formulas fpf . {
 #if YYDEBUG
-        log_debug("filtered_package_formulas leftrec");
+        LOG_DEBUG(0, "filtered_package_formulas leftrec");
 #endif
     }
 
     fpf ::= fpf LOGOP fpf . {
 #if YYDEBUG
-        log_debug("fpf: fpf LOGOP fpf");
+        LOG_DEBUG(0, "fpf: fpf LOGOP fpf");
 #endif
     }
 
     fpf ::= LPAREN fpf RPAREN . {
 #if YYDEBUG
-        log_debug("fpf: (fpf)");
+        LOG_DEBUG(0, "fpf: (fpf)");
 #endif
     }
 
     fpf ::= PKGNAME(Pkg) fvf_expr . {
-        log_debug("fpf: pkgname fvf_expr:**************** %s",
+        LOG_DEBUG(1, "fpf: pkgname fvf_expr:**************** %s",
                   Pkg.s);
 #if YYDEBUG
 #endif
@@ -461,7 +468,7 @@ stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
 
     fpf ::= PKGNAME(Pkg) . {
 #if YYDEBUG
-        log_debug("fpf: **************** pkgname: %s", Pkg.s);
+        LOG_DEBUG(0, "fpf: **************** pkgname: %s", Pkg.s);
 #endif
         /* Deps = calloc(sizeof(struct opam_binding_s), 1); */
     }
@@ -469,7 +476,7 @@ stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
     // ################################################################
         fvf_expr ::= LBRACE fvf RBRACE . {
 #if YYDEBUG
-        log_debug("fvf_expr: braces");
+        LOG_DEBUG(0, "fvf_expr: braces");
 #endif
     }
 /*
@@ -487,76 +494,76 @@ stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
 
     fvf ::= . {
 #if YYDEBUG
-        log_debug("fvf: null");
+        LOG_DEBUG(0, "fvf: null");
 #endif
     }
 
         fvf ::= fvf logop_fvf . {
 #if YYDEBUG
-        log_debug("fvf: fvf logop_fvf");
+        LOG_DEBUG(0, "fvf: fvf logop_fvf");
 #endif
     }
 
         logop_fvf ::= LOGOP fvf . {
 #if YYDEBUG
-        log_debug("fvf: fvf logop fvf");
+        LOG_DEBUG(0, "fvf: fvf logop fvf");
 #endif
     }
 
 /*         fvf ::=  BANG fvf . { */
 /* #if YYDEBUG */
-/*         log_debug("fvf: bang fvf"); */
+/*         LOG_DEBUG(0, "fvf: bang fvf"); */
 /* #endif */
 /*     } */
 
 /*         fvf ::= QMARK fvf . { */
 /* #if YYDEBUG */
-/*         log_debug("fvf: qmark fvf"); */
+/*         LOG_DEBUG(0, "fvf: qmark fvf"); */
 /* #endif */
 /*     } */
 
 // | "(" <filtered-version-formula> ")"
 /*         fvf ::=  LPAREN fvf RPAREN . { */
 /* #if YYDEBUG */
-/*         log_debug("fvf: (fvf)"); */
+/*         LOG_DEBUG(0, "fvf: (fvf)"); */
 /* #endif */
 /*     } */
 
         // | <relop> <version>
 /*         fvf_base ::= RELOP VERSION . { */
 /* #if YYDEBUG */
-/*         log_debug("fvf_base: relop version"); */
+/*         LOG_DEBUG(0, "fvf_base: relop version"); */
 /* #endif */
 /*     } */
 
        fvf ::= fvf_base . {
 #if YYDEBUG
-        log_debug("fvf: fvf_base");
+        LOG_DEBUG(0, "fvf: fvf_base");
 #endif
        }
 
        fvf ::= filter_expr . [AMP] {
 #if YYDEBUG
-        log_debug("fvf: filter_expr");
+        LOG_DEBUG(0, "fvf: filter_expr");
 #endif
        }
 
             fvf_base ::= VERSION . { // treated as <string>
 #if YYDEBUG
-        log_debug("fvf_base: version");
+        LOG_DEBUG(0, "fvf_base: version");
 #endif
     }
         // | <filter>
 /*         fvf_base ::= filter . { */
 /* #if YYDEBUG */
-/*             log_debug("fvf_base: filter"); */
+/*             LOG_DEBUG(0, "fvf_base: filter"); */
 /* #endif */
 /*     } */
 
         // | <relop> <filter>
 /*         fvf_base ::= RELOP filter . { */
 /* #if YYDEBUG */
-/*         log_debug("fvf_base: relop filter"); */
+/*         LOG_DEBUG(0, "fvf_base: relop filter"); */
 /* #endif */
 /*     } */
 
@@ -576,61 +583,61 @@ stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
 
 filter_expr ::= filter . [LOGOP] {
 #if YYDEBUG
-        log_debug("filter_expr: filter");
+        LOG_DEBUG(0, "filter_expr: filter");
 #endif
     }
 
             filter_expr ::= filter LOGOP filter . {
 #if YYDEBUG
-        log_debug("filter_expr: filter_expr logop_filter");
+        LOG_DEBUG(0, "filter_expr: filter_expr logop_filter");
 #endif
     }
 
         filter ::= RELOP VERSION . {
 #if YYDEBUG
-        log_debug("filter: relop version");
+        LOG_DEBUG(0, "filter: relop version");
 #endif
     }
 
         filter ::= RELOP filter . {
 #if YYDEBUG
-        log_debug("filter: relop filter");
+        LOG_DEBUG(0, "filter: relop filter");
 #endif
     }
 
 /*         logop_filter ::= LOGOP filter . { */
 /* #if YYDEBUG */
-/*         log_debug("logop_filter: logop filter"); */
+/*         LOG_DEBUG(0, "logop_filter: logop filter"); */
 /* #endif */
 /*     } */
 
 filter ::= LPAREN filter RPAREN . {
 #if YYDEBUG
-        log_debug("filter: (filter)");
+        LOG_DEBUG(0, "filter: (filter)");
 #endif
     }
 
     filter ::= BANG filter . {
 #if YYDEBUG
-        log_debug("filter: BANG filter");
+        LOG_DEBUG(0, "filter: BANG filter");
 #endif
     }
 
     filter ::= QMARK filter . {
 #if YYDEBUG
-        log_debug("filter: QMARK filter");
+        LOG_DEBUG(0, "filter: QMARK filter");
 #endif
     }
 
     filter ::= FILTER . { // varident|string|int|bool
 #if YYDEBUG
-        log_debug("filter: FILTER");
+        LOG_DEBUG(0, "filter: FILTER");
 #endif
     }
 
 filter ::= VARIDENT . {
 #if YYDEBUG
-        log_debug("filter: VARIDENT");
+        LOG_DEBUG(0, "filter: VARIDENT", "");
 #endif
 }
 
