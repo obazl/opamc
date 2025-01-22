@@ -1,8 +1,9 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 load("@bazel_skylib//rules:common_settings.bzl",
      "bool_flag", "string_flag")
 
 load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
-load("@lemon//src:BUILD.bzl", "lemon")
 
 load("//config/cc:CONFIG.bzl",
      "BASE_DEPS",
@@ -14,7 +15,6 @@ load("//config/cc:CONFIG.bzl",
 COPTS         = BASE_COPTS
 DEPS          = BASE_DEPS
 # LINKOPTS      = BASE_LINKOPTS
-TOOLCHAINS = ["//:module_profiles"]
 
 # exports_files(["macros_debug.h", "macros_ndebug.h",
 #                "ansi_colors.h"])
@@ -33,24 +33,26 @@ cc_library(
         "//lib/parser:opam_parser",
     ],
     copts = COPTS + [
-        "-I$(GENDIR)/$(@)/lib/internal",
+        "-I$(GENDIR)",
     ],
     defines = BASE_DEFINES + select({
         ## for pselect stuff:
         "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
         "//conditions:default": []
+    }) + select({
+        "@obazl_config_cc//profile:dev?": ["PROFILE_dev"],
+        "//conditions:default": []
     }),
 
     local_defines = define_module_version(),
     linkopts = BASE_LINKOPTS,
-    toolchains = TOOLCHAINS,
     visibility = ["//visibility:public"]
 )
 
 ################################################################
 makeheaders(
     name = "mkhdrs",
-    outdir = "internal",
+    outdir = "include",
     hdrs_srcs = [
         "opam_config.c",
         "cmd_runner.c",
@@ -62,13 +64,13 @@ makeheaders(
     ],
     additional_srcs = [
         "//lib/lexer:opamlexer.h",
-        "@makeheaders//logging:ansi_colors.h",
+        "@liblogc//macros:ansi_colors.h",
     ] + select({
-        "@makeheaders//compilation_mode:fastbuild": [
-            "@makeheaders//logging:macros_debug.h"
+        "@obazl_config_cc//profile:dev?": [
+            "@liblogc//macros:logging_debug.h"
         ],
         "//conditions:default": [
-            "@makeheaders//logging:macros_ndebug.h"
+            "@liblogc//macros:logging_ndebug.h"
         ]
     }),
     visibility = ["//visibility:public"]

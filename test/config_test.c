@@ -27,7 +27,7 @@ extern char *opamc_version;
 bool verbose;
 int  verbosity;
 
-#if defined(PROFILE_fastbuild)
+#if defined(PROFILE_dev)
 #define DEBUG_LEVEL opamc_debug
 extern  int  DEBUG_LEVEL;
 #define TRACE_FLAG opamc_trace
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     while ((opt = getopt(argc, argv, "dhv")) != -1) {
         switch (opt) {
-#if defined(PROFILE_fastbuild)
+#if defined(PROFILE_dev)
         case 'd':
             opamc_debug++;
             break;
@@ -75,7 +75,8 @@ int main(int argc, char *argv[])
     char *ocaml_version = opam_switch_ocaml_version(switch_name);
     log_debug("ocaml_version: %s", ocaml_version);
 
-    char *compiler_version = opam_switch_base_compiler_version(switch_name);
+    /* char *compiler_version = opam_switch_base_compiler_version(switch_name); */
+    char *compiler_version = opam_ocaml_compiler_version(switch_name);
     log_debug("base_compiler_version: %s", compiler_version);
 
     log_debug("config_test exiting");

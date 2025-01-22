@@ -35,12 +35,10 @@ const char *opamc_version = OPAMC_VERSION;
 extern bool verbose;
 extern int  verbosity;
 
-#if defined(PROFILE_fastbuild)
 #define DEBUG_LEVEL opamc_debug
 int  DEBUG_LEVEL;
 #define TRACE_FLAG opamc_trace
 bool TRACE_FLAG;
-#endif
 
 extern int rc;
 
@@ -134,19 +132,37 @@ EXPORT char *opam_switch_ocaml_version(char *opam_switch)
     return result;
 }
 
-EXPORT char *opam_switch_base_compiler_version(char *opam_switch)
+/* EXPORT char *opam_switch_base_compiler_version(char *opam_switch) */
+/* { */
+/*     TRACE_ENTRY */
+/*     char *result = NULL; */
+/*     char *exe = "opam"; */
+/*     char *argv[] = {"opam", "var", "ocaml-base-compiler:version", "--switch", opam_switch, NULL}; */
+/*     result = run_cmd(exe, argv); */
+/*     if (result == NULL) { */
+/*         fprintf(stderr, */
+/*                 RED "ERROR" CRESET */
+/*                 " %s:%d run_cmd 'opam var ocaml-base-compiler:version --switch %s'\n", */
+/*                 __FILE__, __LINE__, opam_switch); */
+/*     } */
+/*     return result; */
+/* } */
+
+EXPORT char *opam_ocaml_compiler_version(char *opam_switch)
 {
     TRACE_ENTRY
     char *result = NULL;
     char *exe = "opam";
-    char *argv[] = {"opam", "var", "ocaml-base-compiler:version", "--switch", opam_switch, NULL};
+    char *argv[] = {"opam", "var", "ocaml:version", "--switch", opam_switch, NULL};
     result = run_cmd(exe, argv);
     if (result == NULL) {
         fprintf(stderr,
                 RED "ERROR" CRESET
-                " %s:%d run_cmd 'opam var ocaml-base-compiler:version --switch %s'\n",
+                " %s:%d run_cmd 'opam var ocaml:version --switch %s'\n",
                 __FILE__, __LINE__, opam_switch);
     }
     return result;
 }
+
+
 

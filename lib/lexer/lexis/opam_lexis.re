@@ -36,7 +36,7 @@ int opam_curr_tag = 0;
 /* enable start conditions */
 /*!types:re2c */
 
-#if defined(PROFILE_fastbuild)
+#if defined(PROFILE_dev)
 #define DEBUG_LEVEL opamc_lexis_debug
 int  DEBUG_LEVEL;
 #define TRACE_FLAG opamc_lexis_trace

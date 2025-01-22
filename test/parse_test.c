@@ -25,12 +25,12 @@ UT_string *build_file;
 
 UT_string *buffer;
 
-#if defined(PROFILE_fastbuild)
 #define DEBUG_LEVEL opamc_syntaxis_debug
 extern  int  DEBUG_LEVEL;
+extern  int  opamc_lexis_debug;
 #define TRACE_FLAG opamc_syntaxis_trace
 extern  bool TRACE_FLAG;
-#endif
+extern  bool  opamc_lexis_trace;
 
 int compareFiles(FILE *file1, FILE *file2)
 {
@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
 
     /* opamc_trace = true; */
     /* opamc_debug = 2; */
+
+    opamc_syntaxis_debug = 1;
 
     utstring_new(build_file);
 
@@ -116,6 +118,8 @@ int main(int argc, char *argv[])
         }
             break;
         case BINDING_DEPENDS: {
+            log_info("DEPS");
+            printf("binding: %s: %s\n", binding->name, (char*)binding->val);
             /* UT_array *strings = (UT_array*)binding->val; */
             /* printf("Binding: %s: <stringlist> ct: %d\n", */
             /*        binding->name, utarray_len(strings)); */

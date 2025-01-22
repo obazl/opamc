@@ -1,6 +1,5 @@
-load("@obazl_tools_cc//config:BASE.bzl",
+load("@obazl_config_cc//config:BASE.bzl",
      _BASE_COPTS    = "BASE_COPTS",
-     _BASE_LINKOPTS = "BASE_LINKOPTS",
      _define_module_version = "define_module_version")
 
 define_module_version = _define_module_version
@@ -9,11 +8,11 @@ BASE_COPTS = _BASE_COPTS
 
 BASE_DEPS = ["@liblogc//lib:logc"]
 
-BASE_DEFINES = ["PROFILE_$(COMPILATION_MODE)"]
+BASE_DEFINES = [] # "PROFILE_$(COMPILATION_MODE)"]
 
 BASE_LOCAL_DEFINES = []
 
-BASE_LINKOPTS      = _BASE_LINKOPTS
+BASE_LINKOPTS      = []
 
 # def pkg_include(pkg):
 #     if native.repository_name() == "@":

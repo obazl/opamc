@@ -4,27 +4,19 @@
 
 #include "liblogc.h"
 
-/* #if EXPORT_INTERFACE */
-/* #include "utarray.h" */
-/* #include "uthash.h" */
-/* #include "utstring.h" */
-/* #endif */
-
 #include "opam_lexer.h"
 
-#if defined(PROFILE_fastbuild)
 #define DEBUG_LEVEL opamc_lexis_debug
 int  DEBUG_LEVEL;
 #define TRACE_FLAG opamc_lexis_trace
 bool TRACE_FLAG;
-#endif
 
 #if EXPORT_INTERFACE
 #define TOKEN_NAME(x) (char*)#x
 #endif
 
 #if defined(LEXDEBUG)
-char *opam_token_names[256] = {
+EXPORT char *opam_token_names[256] = {
     [AMP]      = TOKEN_NAME(amp),
     [AUTHORS]      = TOKEN_NAME(authors),
     [AVAILABLE]      = TOKEN_NAME(available),

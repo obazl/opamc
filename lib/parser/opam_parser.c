@@ -28,12 +28,10 @@
 
 /* UT_string *package; */
 
-#if defined(PROFILE_fastbuild)
 #define DEBUG_LEVEL opamc_syntaxis_debug
 int  DEBUG_LEVEL;
 #define TRACE_FLAG opamc_syntaxis_trace
 bool TRACE_FLAG;
-#endif
 
 int line;
 int col;

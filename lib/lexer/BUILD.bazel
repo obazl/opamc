@@ -1,8 +1,9 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 load("@bazel_skylib//rules:common_settings.bzl",
      "bool_flag", "string_flag")
 
 load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
-load("@lemon//src:BUILD.bzl", "lemon")
 
 load("//config/cc:CONFIG.bzl",
      "BASE_COPTS",
@@ -14,7 +15,6 @@ load("//config/cc:CONFIG.bzl",
 COPTS         = BASE_COPTS
 DEPS          = BASE_DEPS
 LINKOPTS      = BASE_LINKOPTS
-TOOLCHAINS = ["//:module_profiles"]
 
 # exports_files(glob(["*.c"], exclude = ["macors_ndebug.h"]))
 
@@ -29,10 +29,15 @@ cc_library(
     hdrs = ["opamlexer.h"],
     implementation_deps = DEPS,
     deps = ["@uthash//lib:uthash"],
+    includes = ["."],
     copts = COPTS + [
         "-Wno-unused-parameter", # macos
+        "-I$(GENDIR)",
+        # "-I$(GENDIR)/+_repo_rules+opamc/lib/lexer",
+        # "-I$(GENDIR)/opamc+/lib/lexer",
+        # "-I$(GENDIR)/lib/lexer",
 
-        "-I$(GENDIR)/$(@)/lib/lexer",
+
         # "-I$(@liblogc)/lib",
         # "-I$(@uthash)/lib"
     ] + select({
@@ -45,7 +50,7 @@ cc_library(
         "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
         "//conditions:default": []
     }),
-    local_defines = select({
+    local_defines = ["LEXDEBUG"] + select({
         ":yydebug-enabled": ["YYDEBUG"],
         "//conditions:default":   []
     }) + select({
@@ -64,7 +69,6 @@ cc_library(
         ":lexdebug-build-filter": ["LEXDEBUG_BUILD_FILTER"],
         "//conditions:default":   []
     }),
-    toolchains = TOOLCHAINS,
     visibility = ["//test:__subpackages__",
                   "//lib/parser:__pkg__"]
 )
@@ -83,12 +87,12 @@ makeheaders(
     additional_srcs = [
         "//lib/parser:opam_syntaxis.c", ## defines token_type constants
     ] + select({
-        "@makeheaders//compilation_mode:fastbuild": [
-            "@makeheaders//logging:ansi_colors.h",
-            "@makeheaders//logging:macros_debug.h"
+        "@obazl_config_cc//profile:dev?": [
+            "@liblogc//macros:ansi_colors.h",
+            "@liblogc//macros:logging_debug.h"
         ],
         "//conditions:default": [
-            "@makeheaders//logging:macros_ndebug.h"
+            "@liblogc//macros:logging_ndebug.h"
         ]
     }),
     visibility = ["//visibility:public"]

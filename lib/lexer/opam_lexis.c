@@ -53,7 +53,7 @@ enum YYCONDTYPE {
 #line 37 "lib/lexer/lexis/opam_lexis.re"
 
 
-#if defined(PROFILE_fastbuild)
+#if defined(PROFILE_dev)
 #define DEBUG_LEVEL opamc_lexis_debug
 int  DEBUG_LEVEL;
 #define TRACE_FLAG opamc_lexis_trace

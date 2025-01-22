@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
 load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
 
 load("//config/cc:CONFIG.bzl",
@@ -10,7 +12,6 @@ load("//config/cc:CONFIG.bzl",
 COPTS         = BASE_COPTS
 DEPS          = BASE_DEPS
 LINKOPTS      = BASE_LINKOPTS
-TOOLCHAINS = ["//:test_module_profiles"]
 
 ##########
 cc_binary(
@@ -34,7 +35,6 @@ cc_binary(
         "@uthash//lib:uthash",
         "//lib:opamc"
     ],
-    toolchains = TOOLCHAINS,
 )
 
 ##########
@@ -51,14 +51,13 @@ cc_binary(
         "//lib/lexer:opam_lexer"
     ],
     copts = COPTS + [
-        "-I$(GENDIR)/$(@)/lib/lexer",
-        "-I$(GENDIR)/$(@)/test",
+        "-I$(GENDIR)/lib/lexer",
+        "-I$(GENDIR)/test",
         # "-I$(@liblogc)/src",
         # "-I$(@uthash)/src"
     ],
     local_defines = BASE_LOCAL_DEFINES,
     defines = BASE_DEFINES,
-    toolchains = TOOLCHAINS,
 )
 
 ##########
@@ -75,8 +74,8 @@ cc_binary(
         "//lib:opamc"
     ],
     copts = COPTS + [
-        "-I$(GENDIR)/$(@)/src",
-        "-I$(GENDIR)/$(@)/test",
+        "-I$(GENDIR)/src",
+        "-I$(GENDIR)/test",
         # "-I$(@liblogc)/src",
         # "-I$(@uthash)/src"
 
@@ -87,7 +86,6 @@ cc_binary(
     ],
     local_defines = BASE_LOCAL_DEFINES,
     defines = BASE_DEFINES,
-    toolchains = TOOLCHAINS,
 )
 
 ################################################################
@@ -165,7 +163,6 @@ makeheaders(
 #         "-I$(@uthash)/src"
 #     ],
 #     local_defines = DEFINES,
-#     toolchains = TOOLCHAINS,
 # )
 
 ##########
@@ -189,6 +186,5 @@ makeheaders(
 #         "@uthash//lib:uthash",
 #         # "@libfindlib//src:findlib"
 #     ],
-#     toolchains = TOOLCHAINS,
 # )
 

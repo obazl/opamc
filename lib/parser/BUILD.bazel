@@ -1,8 +1,10 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 load("@bazel_skylib//rules:common_settings.bzl",
      "bool_flag", "string_flag")
 
 load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
-load("@lemon//src:BUILD.bzl", "lemon")
+load("@lemon//rules:lemon.bzl", "lemon")
 
 load("//config/cc:CONFIG.bzl",
      "BASE_COPTS",
@@ -14,7 +16,6 @@ load("//config/cc:CONFIG.bzl",
 COPTS         = BASE_COPTS
 DEPS          = BASE_DEPS
 LINKOPTS      = BASE_LINKOPTS
-TOOLCHAINS = ["//:module_profiles"]
 
 exports_files(glob(["*.c"]))
 
@@ -30,27 +31,21 @@ cc_library(
     implementation_deps = DEPS + [
         ":opam_syntaxis",
         "//lib/lexer:opam_lexer",
-        # "@liblogc//lib:logc",
-        # "@uthash//lib:uthash"
     ],
+    includes = ["."],
     copts = COPTS + [
-        "-I$(GENDIR)/$(@)/lib/parser",
-
+        "-I$(GENDIR)",
         # "-Wno-unused-variable", # in lemon-generated code
-        # "-I$(GENDIR)/$(@)/lib/lexer",
-        # "-I$(@liblogc)/lib",
-        # "-I$(@uthash)/lib",
     ],
     defines = BASE_DEFINES + select({
         ## for strdup, strndup:
         "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
         "//conditions:default": []
     }),
-    local_defines = select({
+    local_defines = ["LEXDEBUG"] + select({
         ":lexdebug-enabled": ["LEXDEBUG"],
         "//conditions:default":   []
     }),
-    toolchains = TOOLCHAINS,
     visibility = [
         "//lib:__pkg__",
         "//extender:__pkg__",
@@ -76,7 +71,7 @@ cc_library(
         "-I.", ## DO NOT REMOVE!!!
 
     ],
-    defines = BASE_DEFINES + select({
+    defines = ["YYDEBUG"] + BASE_DEFINES + select({
         ## for strdup, strndup:
         "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
         "//conditions:default": []
@@ -87,7 +82,6 @@ cc_library(
         ":yytrace-enabled": ["YYTRACE"],
         "//conditions:default":   []
     }),
-    toolchains = TOOLCHAINS,
     # to add: YYDEBUG_FILTER, etc.
     visibility = ["//test:__subpackages__"]
 )
@@ -100,8 +94,8 @@ lemon(
     ## NB: these are for lemon's %if, not cpp's #if
     ## fvf = filtered version formula
     ## fpf = filtered package formula
-    defines = [
-        # "PROFILE_fastbuild"
+    defines = ["YYDEBUG"
+        # "PROFILE_dev"
         ] + select({
         ":yydebug-enabled": ["YYDEBUG"],
         "//conditions:default":   []
@@ -137,12 +131,12 @@ makeheaders(
     additional_srcs = [
         "//lib/lexer:opamlexer.h",
     ] + select({
-        "@makeheaders//compilation_mode:fastbuild": [
-            "@makeheaders//logging:ansi_colors.h",
-            "@makeheaders//logging:macros_debug.h"
+        "@obazl_config_cc//profile:dev?": [
+            "@liblogc//macros:ansi_colors.h",
+            "@liblogc//macros:logging_debug.h"
         ],
         "//conditions:default": [
-            "@makeheaders//logging:macros_ndebug.h"
+            "@liblogc//macros:logging_ndebug.h"
         ]
     }),
     visibility = ["//visibility:public"]
