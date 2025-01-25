@@ -19,16 +19,33 @@
 #endif
 #endif
 
-#define DEBUG_LEVEL opamc_syntaxis_debug
-extern int  DEBUG_LEVEL;
-#define TRACE_FLAG opamc_syntaxis_trace
-extern bool TRACE_FLAG;
+#define DEBUG_LEVEL debug_opamc_syntaxis
+int  DEBUG_LEVEL;
+#define TRACE_FLAG trace_opamc_syntaxis
+bool TRACE_FLAG;
+
+}
+
+%include {
+struct opam_arg_s *p;
+#define DUMP_ARGS(args)                          \
+    LOG_DEBUG(0, "DUMPING args", "");           \
+    LOG_DEBUG(0, "args ct: %d",                 \
+                  utarray_len(args));              \
+    for(p=(struct opam_arg_s*)utarray_front(args); \
+        p!=NULL;                                  \
+        p=(struct opam_arg_s*)utarray_next(args,p)) {    \
+       LOG_DEBUG(0, "\tval: %s, type: %d", p->val, p->t); \
+     }
+    /* while ( (p=(char**)utarray_next(tok.args,p))) { \ */
+    /*     LOG_DEBUG(0, "\t%s",*p);             \ */
+    /* } */
 }
 
 /* %ifdef PROFILE_dev */
 /* %endif */
 
-/* opam_parse_state->pkg->entries is a uthash of bindings. parse rules
+/* opam_parse_state->pkg->bindings is a uthash of bindings. parse rules
 update it directly */
 /* a binding is (name, val); val may be another hash (e.g. for depends: key)  */
 /* FIXME: we need a custom struct for deps: name, version, optional version_relop, optional constraint (e.g. 'with-test') */
@@ -67,13 +84,14 @@ update it directly */
 %token EXTRA_SOURCE.
 %token FALSE.
 %token FEATURES.
-%token FILTER.
+/* %token FILTER. */
 %token FLAGS.
 %token FVF_LOGOP.
 %token HOMEPAGE.
 %token IDENT.
 %token IDENTCHAR.
 %token INSTALL.
+%token INT.
 %token KEYWORD.
 %token LBRACE.
 %token LBRACKET.
@@ -94,7 +112,7 @@ update it directly */
 %token REMOVE.
 %token RELOP.
 %token RPAREN.
-%token RUN_TEST.
+%token RUNTEST.
 %token SETENV.
 %token SQ.
 %token STRING.
@@ -129,14 +147,16 @@ update it directly */
 %type stringlist { UT_array * }
 
 %syntax_error {
-    log_error("**************** SYNTAX ERROR! ****************");
+    LOG_ERROR(0, RED "SYNTAX ERROR" CRESET " yymajor: %d", yymajor);
+    LOG_ERROR(0, RED "tos.stateno" CRESET ": %d", yypParser->yytos->stateno);
+    LOG_ERROR(0, RED "tos.major" CRESET ": %d", yypParser->yytos->major);
+    LOG_ERROR(0, RED "tos.minor" CRESET ": %d", yypParser->yytos->minor);
 /* args passed:
    yyParser *yypParser, /\* The parser *\/
    int yymajor, /\* The major type of the error token *\/
    ParseTOKENTYPE yyminor /\* The minor type of the error token *\/
    ParseTOKENTYPE is union opam_token_u
  */
-
 
 %ifdef YYDEBUG_EXIT_ON_ERROR
    exit(EXIT_FAILURE);
@@ -150,106 +170,74 @@ update it directly */
 }
 
 %parse_failure {
-    fprintf(stderr,"Giving up.  Parser is hopelessly lost...\n");
+    LOG_ERROR(0, "Giving up.  Parser is hopelessly lost... %d",
+    yypParser->yyerrcnt);
 }
 
 /* *******************  PARSE RULES  ********************* */
 %start_symbol package
 
 package ::= bindings . {
-#if YYDEBUG
-    LOG_DEBUG(0, "PACKAGE", "");
+    LOG_DEBUG(0, "Pkg src: %s", opam_parse_state->pkg->src);
     LOG_DEBUG(0, " bindings ct: %d",
-              HASH_CNT(hh, opam_parse_state->pkg->entries));
-#endif
+              HASH_CNT(hh, opam_parse_state->pkg->bindings));
+    struct opam_binding_s *b;
+    for (b = opam_parse_state->pkg->bindings;
+         b != NULL;
+         b = b->hh.next) {
+        LOG_DEBUG(0, "\t%s:", b->name);
+    }
 }
 
-%ifdef YYDEBUG_BUILD_FILTER
-package ::= build_filter . {
-    LOG_DEBUG(0, "START build_filter", "");
-}
-%endif
-
-%ifdef YYDEBUG_FILTER
-package ::= filter . {
-    LOG_DEBUG(0, "START filter", "");
-}
-%endif
-
-%ifdef YYDEBUG_FPF
-package ::= filtered_package_formulas . {
-    LOG_DEBUG(0, "START filtered_package_formulas");
-}
-%endif
-
-%ifdef YYDEBUG_FVF
-package ::= fvf_expr . {
-    LOG_DEBUG(0, "START fvf");
-    /* printf("    bindings ct: %d\n", */
-    /*        HASH_CNT(hh, opam_parse_state->pkg->entries)); */
-}
-%endif
-
- /****************************************************************/
 bindings ::= binding . {
-/* #if YYDEBUG */
-/*     printf("ONE BINDING\n"); */
-/* #endif */
-}
-
-bindings(Bindings_lhs) ::= bindings(Bindings_rhs) binding . {
-#if YYDEBUG
-    LOG_DEBUG(0, "BINDINGS ct: %d",
-           HASH_CNT(hh, opam_parse_state->pkg->entries));
-#endif
-    /* no need to do anything, opam_parse_state->pkg->entries already
-       contains all bindings */
-    Bindings_lhs = Bindings_rhs;
+    LOG_DEBUG(0, "One binding", "");
 }
 
 /* <field-binding> ::= <ident> : <value> */
 /* <value> ::= <bool> | <int> | <string> | <ident> | <varident> | <operator> | <list> | <option> | "(" <value> ")" */
 
+bindings(Bindings_lhs) ::= bindings(Bindings_rhs) binding . {
+    LOG_DEBUG(0, "BINDINGS ct: %d",
+           HASH_CNT(hh, opam_parse_state->pkg->bindings));
+    /* no need to do anything, opam_parse_state->pkg->bindings already
+       contains all bindings */
+    Bindings_lhs = Bindings_rhs;
+}
+
 binding(Binding) ::= KEYWORD(Keyword) COLON STRING(String) . {
-#if YYDEBUG
     LOG_DEBUG(0, "BINDING: %s: %s", Keyword.s, String.s);
-#endif
     /* create a binding and add it to the pkg hashmap */
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = Keyword.s;
     Binding->t = BINDING_STRING;
     Binding->val = strdup(String.s);
-    HASH_ADD_KEYPTR(hh, // opam_parse_state->pkg->entries->hh,
-                    opam_parse_state->pkg->entries,
+    HASH_ADD_KEYPTR(hh, // opam_parse_state->pkg->bindings->hh,
+                    opam_parse_state->pkg->bindings,
                     Binding->name, strlen(Binding->name), Binding);
 }
 
 binding(Binding) ::= KEYWORD(Keyword) COLON string3(String) . {
-#if YYDEBUG
     LOG_DEBUG(0, "BINDING: %s: %s", Keyword.s, String.s);
-#endif
     /* create a binding and add it to the pkg hashmap */
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = Keyword.s;
     Binding->t = BINDING_STRING;
     Binding->val = strdup(String.s);
-    HASH_ADD_KEYPTR(hh, // opam_parse_state->pkg->entries->hh,
-                    opam_parse_state->pkg->entries,
+    HASH_ADD_KEYPTR(hh, // opam_parse_state->pkg->bindings->hh,
+                    opam_parse_state->pkg->bindings,
                     Binding->name, strlen(Binding->name), Binding);
 }
 
 binding(Binding) ::= KEYWORD(Keyword) COLON LBRACKET stringlist(Stringlist) RBRACKET . {
-#if YYDEBUG
     LOG_DEBUG(0, "BINDING stringlist %s, ct: %d",
            Keyword.s, utarray_len(Stringlist));
-#endif
     /* create a binding and add it to the pkg hashmap */
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = Keyword.s;
     Binding->t = BINDING_STRINGLIST;
     Binding->val = (void*)Stringlist;
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
+                    opam_parse_state->pkg->bindings,
                     Binding->name, strlen(Binding->name), Binding);
 #if YYDEBUG
     LOG_DEBUG(0, "BINDING stringlist val ct: %d",
@@ -262,118 +250,130 @@ binding(Binding) ::= KEYWORD(Keyword) COLON LBRACKET stringlist(Stringlist) RBRA
     [ [ <term> { <filter> } ... ] { <filter> } ... ]
  */
 binding(Binding) ::=
-    BUILD COLON LBRACKET term_grammar RBRACKET . {
-#if YYDEBUG
-        LOG_DEBUG(0, "BINDING build", "");
-#endif
+    BUILD LBRACKET cmdlist(Cmds) RBRACKET . {
+    LOG_DEBUG(0, "build [cmdlist]", "");
+    // for each cmd in cmdlist, print the args
+    struct opam_cmd_s *cmd = NULL;
+    for(cmd=(struct opam_cmd_s*)utarray_front(Cmds.cmds);
+        cmd!=NULL;
+        cmd=(struct opam_cmd_s*)utarray_next(Cmds.cmds, cmd)) {
+        int ct = utarray_len(cmd->args);
+        LOG_DEBUG(0, "cmd args ct: %d", ct);
+        struct opam_arg_s *arg = NULL;
+        for(arg=(struct opam_arg_s*)utarray_front(cmd->args);
+            arg!=NULL;
+            arg=(struct opam_arg_s*)utarray_next(cmd->args, arg)) {
+            LOG_DEBUG(0, "\t%s", arg->val);
+        }
+    }
+    /* opam_parse_state->pkg->bindings, */
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = strndup("build", 5);
     Binding->t = BINDING_BUILD;
-    /* Binding->val =  */
+    Binding->val = Cmds.cmds;
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
+                    opam_parse_state->pkg->bindings,
                     Binding->name, strlen(Binding->name), Binding);
 }
 
 binding(Binding) ::=
-    INSTALL COLON LBRACKET term_grammar RBRACKET . {
-#if YYDEBUG
-        LOG_DEBUG(0, "BINDING install", "");
-#endif
+    INSTALL LBRACKET cmdlist RBRACKET . {
+    LOG_DEBUG(0, "BINDING install", "");
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = strndup("install", 7);
     Binding->t = BINDING_BUILD;
     /* Binding->val =  */
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
+                    opam_parse_state->pkg->bindings,
                     Binding->name, strlen(Binding->name), Binding);
 }
 
 binding(Binding) ::=
-    RUN_TEST COLON LBRACKET term_grammar RBRACKET . {
-#if YYDEBUG
-        LOG_DEBUG(0, "BINDING run-test", "");
-#endif
+    RUNTEST LBRACKET cmdlist RBRACKET . {
+    LOG_DEBUG(0, "BINDING run-test", "");
     Binding = calloc(sizeof(struct opam_binding_s), 1);
     Binding->name = strndup("run-test", 8);
     Binding->t = BINDING_BUILD;
     /* Binding->val =  */
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
+                    opam_parse_state->pkg->bindings,
                     Binding->name, strlen(Binding->name), Binding);
 }
 
-term_grammar ::= . {
-    LOG_DEBUG(0, "term_grammar null", "");
+cmdlist(CMDS) ::= . {
+    LOG_DEBUG(0, "cmdlist (empty)", "");
+    UT_array *cmds;
+    utarray_new(cmds, &opam_cmd_icd);
+    CMDS.cmds = cmds;
 }
 
-term_grammar ::= term_grammar build_cmd . {
-    LOG_DEBUG(0, "term_grammar list", "");
+cmdlist(CMDS) ::= cmdlist(Cmds) cmd(Cmd) . {
+    LOG_DEBUG(0, "cmdlist cmd", "");
+    DUMP_ARGS(Cmd.cmd->args);
+    utarray_push_back(Cmds.cmds, Cmd.cmd);
+    CMDS.cmds = Cmds.cmds;
 }
 
-build_cmd ::= LBRACKET build_terms RBRACKET . {
-    LOG_DEBUG(0, "build_cmd", "");
+cmd(CMD) ::= LBRACKET args(Args) RBRACKET . {
+    LOG_DEBUG(0, "cmd:: [args]", "");
+    struct opam_cmd_s *cmd = (struct opam_cmd_s*)malloc(
+                       sizeof(struct opam_cmd_s));
+    cmd->args = Args.args;
+    CMD.cmd = cmd;
+    DUMP_ARGS(CMD.cmd->args);
 }
 
-build_cmd ::= LBRACKET build_terms RBRACKET build_filter . {
-    LOG_DEBUG(0, "build_cmd filtered", "");
+cmd(CMD) ::= LBRACKET args(Args) RBRACKET filter(F) . {
+    LOG_DEBUG(0, "cmd:: [args] filter", "");
+    struct opam_cmd_s *cmd = (struct opam_cmd_s*)malloc(
+                       sizeof(struct opam_cmd_s));
+    cmd->args = Args.args;
+    cmd->filter = F.filter;
+    CMD.cmd = cmd;
 }
 
-build_terms ::= . {
-    LOG_DEBUG(0, "build_terms", "");
+args(ARGS) ::= . {
+    LOG_DEBUG(0, "args (empty)", "");
+    UT_array *args;
+    utarray_new(args, &opam_arg_icd);
+    /* struct opam_arg_s *arg = (struct opam_arg_s*)malloc( */
+    /*                    sizeof(struct opam_arg_s)); */
+    /* arg->val = strdup("testarg"); */
+    /* arg->t   = 0; */
+    /* utarray_push_back(args, arg); */
+    DUMP_ARGS(args);
+    ARGS.args = args;
 }
 
-/* build_terms ::= build_terms TERM_STRING . { */
-/*     LOG_DEBUG(0, "build_terms TERM_STRING"); */
-/* } */
-
-build_terms ::= build_terms build_term . {
-    LOG_DEBUG(0, "build_terms build_term", "");
+args(NEWARGS) ::= args(xargs) arg(a) . {
+    LOG_DEBUG(0, "args arg val %s, type %d", a.arg->val, a.arg->t);
+    DUMP_ARGS(xargs.args);
+    utarray_push_back(xargs.args, a.arg);
+    DUMP_ARGS(xargs.args);
+    NEWARGS = xargs;
 }
 
-build_term ::= TERM_STRING . {
-    LOG_DEBUG(0, "build_term TERM_VARIDENT", "");
+arg(ARG) ::= STRING(str) . {
+    LOG_DEBUG(0, "string arg: %s", str.s);
+    struct opam_arg_s *arg = (struct opam_arg_s*)malloc(
+                       sizeof(struct opam_arg_s));
+    arg->val = strdup(str.s);
+    arg->t   = 0;
+    ARG.arg = arg;
 }
 
-build_term ::= TERM_STRING build_filter . {
-    LOG_DEBUG(0, "build_term TERM_STRING build_term", "");
+arg(ARG) ::= VARIDENT(vid) . {
+    LOG_DEBUG(0, "var arg: %s", vid.s);
+    struct opam_arg_s *arg = (struct opam_arg_s*)malloc(
+                       sizeof(struct opam_arg_s));
+    arg->val = strdup(vid.s);
+    arg->t   = 1;
+    ARG.arg = arg;
 }
 
-build_term ::= TERM_VARIDENT . {
-    LOG_DEBUG(0, "build_term TERM_VARIDENT", "");
+arg ::= filter . {
+    LOG_DEBUG(0, "filter arg", "");
 }
-
-build_term ::= TERM_VARIDENT build_filter . {
-    LOG_DEBUG(0, "build_term TERM_VARIDENT build_term", "");
-}
-
-build_filter ::= LBRACE FILTER RBRACE . {
-    LOG_DEBUG(0, "build_filter", "");
-}
-
-build_filter ::= LBRACE build_filter_expr RBRACE . {
-    LOG_DEBUG(0, "build_filter", "");
-}
-
-build_filter_expr ::= STRING . {
-    LOG_DEBUG(0, "build_filter", "");
-}
-
-build_filter_expr ::= VARIDENT . {
-    LOG_DEBUG(0, "build_filter", "");
-}
-
-build_filter_expr ::= build_filter_expr LOGOP build_filter_expr . {
-    LOG_DEBUG(0, "build_filter", "");
-}
-
-build_filter_expr ::= build_filter_expr RELOP build_filter_expr . {
-    LOG_DEBUG(0, "build_filter", "");
-}
-
-/* build_filter_expr ::= FILTER . { */
-/*     LOG_DEBUG(0, "build_filter"); */
-/* } */
 
 /****************************************************************/
 // depends and conflicts use same content model
@@ -389,7 +389,7 @@ binding(Binding) ::=
     /* Binding->val = ... will be list of pkgs */
     /* so here, alloc a UT hash table to hold the list */
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
+                    opam_parse_state->pkg->bindings,
                     Binding->name,
                     strlen(Binding->name),
                     Binding);
@@ -405,7 +405,7 @@ binding(Binding) ::=
     Binding->t = BINDING_DEPENDS;
     /* Binding->val =  */
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
+                    opam_parse_state->pkg->bindings,
                     Binding->name, strlen(Binding->name), Binding);
 }
 
@@ -467,23 +467,17 @@ stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
     fpf ::= PKGNAME(Pkg) fvf_expr . {
         LOG_DEBUG(1, "fpf: pkgname fvf_expr:**************** %s",
                   Pkg.s);
-#if YYDEBUG
-#endif
     }
 
     fpf ::= PKGNAME(Pkg) . {
-#if YYDEBUG
         LOG_DEBUG(0, "fpf: **************** pkgname: %s", Pkg.s);
-#endif
         /* Deps = calloc(sizeof(struct opam_binding_s), 1); */
         /*  */
     }
 
     // ################################################################
-        fvf_expr ::= LBRACE fvf RBRACE . {
-#if YYDEBUG
-        LOG_DEBUG(0, "fvf_expr: braces", "");
-#endif
+    fvf_expr ::= LBRACE fvf RBRACE . {
+      LOG_DEBUG(0, "fvf_expr: braces", "");
     }
 /*
    <filtered-version-formula> ::=
@@ -548,11 +542,11 @@ stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
 #endif
        }
 
-       fvf ::= filter_expr . [AMP] {
-#if YYDEBUG
-        LOG_DEBUG(0, "fvf: filter_expr", "");
-#endif
-       }
+/*        fvf ::= filter_expr . [AMP] { */
+/* #if YYDEBUG */
+/*         LOG_DEBUG(0, "fvf: filter_expr", ""); */
+/* #endif */
+/*        } */
 
             fvf_base ::= VERSION . { // treated as <string>
 #if YYDEBUG
@@ -587,29 +581,98 @@ stringlist(Stringlist_lhs) ::= stringlist(Stringlist) STRING(String) . {
    NB: <varident>, <string>, <int>, <bool> are lexed as FILTER tokens
     */
 
-filter_expr ::= filter . [LOGOP] {
-#if YYDEBUG
-        LOG_DEBUG(0, "filter_expr: filter", "");
-#endif
-    }
+/* arg ::= STRING build_filter . { */
+/*     LOG_DEBUG(0, "arg TERM_STRING arg", ""); */
+/* } */
 
-            filter_expr ::= filter LOGOP filter . {
-#if YYDEBUG
-        LOG_DEBUG(0, "filter_expr: filter_expr logop_filter", "");
-#endif
-    }
+/* build_filter ::= LBRACE INT(intgr) RBRACE . { */
+/*     LOG_DEBUG(0, "{int}: %d", intgr.i); */
+/* } */
 
-        filter ::= RELOP VERSION . {
-#if YYDEBUG
-        LOG_DEBUG(0, "filter: relop version", "");
-#endif
-    }
+/* build_filter_expr ::= STRING(str) . { */
+/*     LOG_DEBUG(0, "filter pred: %s", str.s); */
+/* } */
 
-        filter ::= RELOP filter . {
-#if YYDEBUG
-        LOG_DEBUG(0, "filter: relop filter", "");
-#endif
-    }
+/* build_filter_expr ::= INT(intgr) . { */
+/*     LOG_DEBUG(0, "filter pred: %d", intgr.i); */
+/* } */
+
+/* build_filter_expr ::= VARIDENT(vi) . { */
+/*     LOG_DEBUG(0, "filter pred:: varident %s", vi.s); */
+/* } */
+
+/* build_filter_expr ::= build_filter_expr LOGOP(logop) build_filter_expr . { */
+/*     LOG_DEBUG(0, "compound filter: <pred> %s <pred>", logop.s); */
+/* } */
+
+/* build_filter_expr ::= build_filter_expr RELOP build_filter_expr . { */
+/*     LOG_DEBUG(0, "build_filter RELOP", ""); */
+/* } */
+
+/* build_filter_expr ::= FILTER . { */
+/*     LOG_DEBUG(0, "build_filter"); */
+/* } */
+
+// build_filter_expr = string | var | int
+/* build_filter ::= LBRACE build_filter_expr RBRACE . { */
+/*     LOG_DEBUG(0, "{filter_expr}", ""); */
+/* } */
+
+filter ::= LBRACE pred RBRACE . {
+    LOG_DEBUG(0, "{pred}", "");
+}
+pred ::= pred LOGOP(logop) pred . {
+    LOG_DEBUG(0, "compound pred: <pred> %s <pred>", logop.s);
+}
+pred ::= INT(vid) . {
+    LOG_DEBUG(0, "pred: %s", vid.s);
+}
+pred ::= STRING(str) . {
+    LOG_DEBUG(0, "pred: %s", str.s);
+}
+pred ::= VARIDENT(vid) . {
+    LOG_DEBUG(0, "pred: %s", vid.s);
+}
+pred ::= BANG pred . {
+        LOG_DEBUG(0, "pred: BANG filter", "");
+}
+pred ::= QMARK pred . {
+    LOG_DEBUG(0, "pred: QMARK pred", "");
+}
+pred ::= LPAREN pred RPAREN . {
+    LOG_DEBUG(0, "pred: (pred)", "");
+}
+pred ::= pred RELOP(relop) pred . {
+        LOG_DEBUG(0, "pred: pred %s pred", relop.s);
+}
+
+/* filter ::= LBRACE VARIDENT(vid) RBRACE . { */
+/*     LOG_DEBUG(0, "FILTER varid: %s", vid.s); */
+/* } */
+
+/* filter ::= LBRACE INT(intgr) RBRACE . { */
+/*     LOG_DEBUG(0, "filter int: %d", intgr.i); */
+/* } */
+
+/* filter ::= LBRACE STRING(str) RBRACE . { */
+/*     LOG_DEBUG(0, "filter str: %s", str.s); */
+/* } */
+
+/* filter ::= LBRACE FILTER RBRACE . { */
+/*     LOG_DEBUG(0, "filter", ""); */
+/* } */
+
+/* filter_expr ::= filter . [LOGOP] { */
+/*     LOG_DEBUG(0, "filter_expr: filter", ""); */
+/*     } */
+
+/* filter_expr ::= filter LOGOP filter . { */
+/*     LOG_DEBUG(0, "filter_expr: filter_expr logop_filter", ""); */
+/* } */
+
+/* filter ::= RELOP VERSION . { */
+/*     LOG_DEBUG(0, "filter: relop version", ""); */
+/* } */
 
 /*         logop_filter ::= LOGOP filter . { */
 /* #if YYDEBUG */
@@ -617,35 +680,13 @@ filter_expr ::= filter . [LOGOP] {
 /* #endif */
 /*     } */
 
-filter ::= LPAREN filter RPAREN . {
-#if YYDEBUG
-        LOG_DEBUG(0, "filter: (filter)", "");
-#endif
-    }
+/* filter ::= FILTER . { // varident|string|int|bool */
+/*         LOG_DEBUG(0, "filter: FILTER", ""); */
+/* } */
 
-    filter ::= BANG filter . {
-#if YYDEBUG
-        LOG_DEBUG(0, "filter: BANG filter", "");
-#endif
-    }
-
-    filter ::= QMARK filter . {
-#if YYDEBUG
-        LOG_DEBUG(0, "filter: QMARK filter", "");
-#endif
-    }
-
-    filter ::= FILTER . { // varident|string|int|bool
-#if YYDEBUG
-        LOG_DEBUG(0, "filter: FILTER", "");
-#endif
-    }
-
-filter ::= VARIDENT . {
-#if YYDEBUG
-        LOG_DEBUG(0, "filter: VARIDENT", "");
-#endif
-}
+/* filter ::= VARIDENT . { */
+/*     LOG_DEBUG(0, "filter: VARIDENT", ""); */
+/* } */
 
 string3 ::= TQ STRING3 TQ . {
 }

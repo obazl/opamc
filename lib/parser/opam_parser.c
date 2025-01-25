@@ -21,17 +21,15 @@
 #if EXPORT_INTERFACE
 #include "utarray.h"
 #include "uthash.h"
-/* #include "utstring.h" */
+#include "utstring.h"
 #endif
 
 #include "opam_parser.h"
 
-/* UT_string *package; */
-
-#define DEBUG_LEVEL opamc_syntaxis_debug
-int  DEBUG_LEVEL;
-#define TRACE_FLAG opamc_syntaxis_trace
-bool TRACE_FLAG;
+#define DEBUG_LEVEL debug_opamc_syntaxis
+extern int  DEBUG_LEVEL;
+#define TRACE_FLAG trace_opamc_syntaxis
+extern bool TRACE_FLAG;
 
 int line;
 int col;
@@ -60,16 +58,108 @@ EXPORT struct opam_parse_state_s *opam_parser_init(struct opam_lexer_s *lexer,
     struct opam_parse_state_s *ps = calloc(sizeof(struct opam_parse_state_s), 1);
     ps->lexer = lexer;
     ps->pkg = pkg;
-    ps->pkg->entries = NULL;   /* important! */
+    ps->pkg->bindings = NULL;   /* important! */
     return ps;
 }
 
 EXPORT void opam_parse_state_free(opam_parse_state_s *parser)
 {
-    // log_debug("parser_free %s", parser->lexer->fname);
+    // log_debug("parser_free %s", parser->lexer->src);
     opam_lexer_free(parser->lexer);
     // do not free pkg, client responsible
     free(parser);
+}
+
+/* FIXME: this is exactly the same as opam_parse_file, except
+   it initializes the lexer with a string instead of a file.
+   So unify the two. parse_file should call this routine,
+   since it too parses the string it reads from a file.
+*/
+EXPORT struct opam_package_s *opam_parse_string(const char *label,
+                                                const char *s)
+{
+    TRACE_ENTRY;
+    /* log_set_quiet(false); */
+
+    int token_type;
+    union opam_token_u otok; // = malloc(sizeof(union opam_token_u));
+
+    struct opam_lexer_s * opam_lexer = malloc(sizeof(struct opam_lexer_s));
+    opam_lexer_init(NULL, opam_lexer, s);
+
+    /* client must free */
+    struct opam_package_s
+        *opam_pkg = calloc(sizeof(struct opam_package_s), 1);
+    opam_pkg->src = label;
+
+    void* pOpamParser = ParseAlloc (malloc);
+    struct opam_parse_state_s
+        *opam_parse_state = opam_parser_init(opam_lexer, opam_pkg);
+
+
+#if defined(YYTRACE)
+    char *odir = getenv("TEST_UNDECLARED_OUTPUTS_DIR");
+    /* LOG_DEBUG(0, "TMPDIR: %s", odir); */
+    if (odir == NULL) {
+        odir = getenv("TEST_TMPDIR");
+        if (odir == NULL) {
+            // ???
+        }
+    }
+    UT_string *trace_file;
+    utstring_new(trace_file);
+    utstring_printf(trace_file, "%s/%s", odir,
+                    "lemontrace.log");
+    LOG_DEBUG(0, "TRACE outfile: %s",
+              utstring_body(trace_file));
+    FILE *ftrace;
+    ftrace = fopen(utstring_body(trace_file), "w");
+    if (ftrace == NULL) {
+        LOG_ERROR(0, "fopen failure for %s",
+                  (utstring_body(trace_file)));
+        perror(utstring_body(trace_file));
+        /* log_error("Value of errno: %d", errnum); */
+        /* log_error("fopen error %s", strerror( errnum )); */
+        /* exit(EXIT_FAILURE); */
+        return NULL;
+    }
+    ParseTrace(ftrace, "");
+#endif
+
+    log_set_quiet(false);
+    log_set_level(LOG_TRACE);
+    /* log_info("starting parse"); */
+
+    while ( (token_type = get_next_opam_token(opam_lexer, &otok)) != 0 ) {
+#if defined(LEXDEBUG)
+        log_debug("token type: %d: %s",
+                  token_type, opam_token_names[token_type]);
+        switch(token_type) {
+        case DESCRIPTION:
+        case FILTER:
+        case KEYWORD:
+        case LOGOP:
+        case OPAM_VERSION:
+        case PKGNAME:
+        case RELOP:
+        case STRING:
+        case SYNOPSIS:
+        case TERM:
+        case TERM_STRING:
+        case TERM_VARIDENT:
+        case VARIDENT:
+        case VERSION:
+            log_debug("\ts: %s", (char*)otok.s); break;
+        /* default: */
+        /*     log_debug("other: %d", tok); break; */
+        }
+#endif
+        Parse(pOpamParser, token_type, otok, opam_parse_state);
+    }
+    Parse(pOpamParser, 0, otok, opam_parse_state);
+    ParseFree(pOpamParser, free );
+    opam_parse_state_free(opam_parse_state);
+    return opam_pkg;
 }
 
 EXPORT struct opam_package_s *opam_parse_file(const char *fname)
@@ -124,7 +214,7 @@ EXPORT struct opam_package_s *opam_parse_file(const char *fname)
     /* client must free */
     struct opam_package_s
         *opam_pkg = calloc(sizeof(struct opam_package_s), 1);
-    opam_pkg->fname = strdup(fname);
+    opam_pkg->src = strdup(fname);
 
     void* pOpamParser = ParseAlloc (malloc);
     struct opam_parse_state_s
@@ -183,3 +273,4 @@ EXPORT struct opam_package_s *opam_parse_file(const char *fname)
     free(buffer);
     return opam_pkg;
 }
+

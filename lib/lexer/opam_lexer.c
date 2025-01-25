@@ -6,9 +6,9 @@
 
 #include "opam_lexer.h"
 
-#define DEBUG_LEVEL opamc_lexis_debug
+#define DEBUG_LEVEL debug_opamc_lexis
 int  DEBUG_LEVEL;
-#define TRACE_FLAG opamc_lexis_trace
+#define TRACE_FLAG trace_opamc_lexis
 bool TRACE_FLAG;
 
 #if EXPORT_INTERFACE
@@ -20,14 +20,14 @@ EXPORT char *opam_token_names[256] = {
     [AMP]      = TOKEN_NAME(amp),
     [AUTHORS]      = TOKEN_NAME(authors),
     [AVAILABLE]      = TOKEN_NAME(available),
-    [BANG]      = TOKEN_NAME(bang),
+    [BANG]      = TOKEN_NAME(BANG),
     [BOOL]      = TOKEN_NAME(bool),
     [BUG_REPORTS]  = TOKEN_NAME(bug_reports),
-    [BUILD]      = TOKEN_NAME(build),
-    [BUILD_DOC]      = TOKEN_NAME(build_doc),
-    [BUILD_ENV]      = TOKEN_NAME(build_env),
-    [COLON]        = TOKEN_NAME(colon),
-    [COMMA]        = TOKEN_NAME(comma),
+    [BUILD]      = TOKEN_NAME(BUILD),
+    [BUILD_DOC]      = TOKEN_NAME(BUILD_DOC),
+    [BUILD_ENV]      = TOKEN_NAME(BUILD_ENV),
+    [COLON]        = TOKEN_NAME(COLON),
+    [COMMA]        = TOKEN_NAME(COMMA),
     [CONFLICTS]      = TOKEN_NAME(conflicts),
     [CONFLICT_CLASS]      = TOKEN_NAME(conflict_class),
     [DEPENDS]      = TOKEN_NAME(depends),
@@ -36,8 +36,8 @@ EXPORT char *opam_token_names[256] = {
     [DESCRIPTION]      = TOKEN_NAME(description),
     [DEV_REPO]      = TOKEN_NAME(dev_repo),
     [DOC]          = TOKEN_NAME(doc),
-    [DQ]           = TOKEN_NAME(dq),
-    [EQ]           = TOKEN_NAME(eq),
+    [DQ]           = TOKEN_NAME(DQ),
+    [EQ]           = TOKEN_NAME(EQ),
     [ERROR]        = TOKEN_NAME(error),
     [EXTRA_FILES]      = TOKEN_NAME(extra_files),
     [EXTRA_SOURCE]      = TOKEN_NAME(extra_source),
@@ -50,12 +50,13 @@ EXPORT char *opam_token_names[256] = {
     [IDENT]      = TOKEN_NAME(ident),
     [IDENTCHAR]      = TOKEN_NAME(identchar),
     [INSTALL]      = TOKEN_NAME(install),
+    [INT]          = TOKEN_NAME(int),
     [KEYWORD]      = TOKEN_NAME(keyword),
-    [LBRACE]      = TOKEN_NAME(lbrace),
-    [LBRACKET]      = TOKEN_NAME(lbracket),
+    [LBRACE]      = TOKEN_NAME(LBRACE),
+    [LBRACKET]      = TOKEN_NAME(LBRACKET),
     [LICENSE]      = TOKEN_NAME(license),
     [LOGOP]      = TOKEN_NAME(LOGOP),
-    [LPAREN]       = TOKEN_NAME(lparen),
+    [LPAREN]       = TOKEN_NAME(LPAREN),
     [MAINTAINER]   = TOKEN_NAME(maintainer),
     [MESSAGES]      = TOKEN_NAME(messages),
     [OPAM_VERSION] = TOKEN_NAME(opam_version),
@@ -64,16 +65,16 @@ EXPORT char *opam_token_names[256] = {
     [PIN_DEPENDS]      = TOKEN_NAME(pin_depends),
     [PKGNAME]      = TOKEN_NAME(pkgname),
     [POST_MESSAGES]      = TOKEN_NAME(post_messages),
-    [QMARK]      = TOKEN_NAME(qmark),
-    [RBRACE]      = TOKEN_NAME(rbrace),
-    [RBRACKET]      = TOKEN_NAME(rbracket),
+    [QMARK]      = TOKEN_NAME(QMARK),
+    [RBRACE]      = TOKEN_NAME(RBRACE),
+    [RBRACKET]      = TOKEN_NAME(RBRACKET),
     [RELOP]      = TOKEN_NAME(RELOP),
     [REMOVE]      = TOKEN_NAME(remove),
-    [RPAREN]       = TOKEN_NAME(rparen),
-    [RUN_TEST]      = TOKEN_NAME(run_test),
+    [RPAREN]       = TOKEN_NAME(RPAREN),
+    [RUNTEST]      = TOKEN_NAME(run_test),
     [SETENV]      = TOKEN_NAME(setenv),
     [SQ]      = TOKEN_NAME(sq),
-    [STRING]       = TOKEN_NAME(string),
+    [STRING]       = TOKEN_NAME(STRING),
     [STRING3]       = TOKEN_NAME(string3),
     [SUBSTS]      = TOKEN_NAME(substs),
     [SYNOPSIS]      = TOKEN_NAME(synopsis),
@@ -100,9 +101,6 @@ bool is_empty(const char *s)
   return true;
 }
 
-/* opam_lex_file - for testing TODO: move to test/lex_test.c? */
-/* see sealark_parsers.c */
-/* EXPORT UT_array *opam_lex_file(char *fname) */
 EXPORT void opam_lex_file(char *fname)
 {
     TRACE_ENTRY;

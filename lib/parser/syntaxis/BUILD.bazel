@@ -1,0 +1,55 @@
+load("@lemon//rules:lemon.bzl", "lemon")
+load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
+
+# exports_files(["opam_syntaxis.h"])
+
+# genrule(
+#     name = "cpy",
+#     outs  = ["opam_syntaxis.h"],
+#     srcs = ["//lib/parser:opam_syntaxis.h"],
+#     cmd   = "\n".join([
+#         "cp $(location //lib/parser:opam_syntaxis.h) $@",
+#     ]),
+#     visibility = ["//visibility:public"]
+# )
+
+
+lemon(
+    name = "syntaxis",
+    yy   = "opam_syntaxis.y",
+    outs = ["opam_syntaxis.c","opam_syntaxis.out"],
+    compress = False,
+    ## NB: these are for lemon's %if, not cpp's #if
+    ## fvf = filtered version formula
+    ## fpf = filtered package formula
+    # defines = [ # "YYDEBUG"
+    #     # "PROFILE_dev"
+    #     ] + select({
+    #     "//lib/parser:yydebug-enabled": ["YYDEBUG"],
+    #     "//conditions:default":   []
+    # })
+    defines = select({
+        "@lemon//parser:exit-on-error?": ["YYDEBUG_EXIT_ON_ERROR"],
+        "//conditions:default":   []
+    }) + select({
+        "//lib/parser:debug-filter?": ["YYDEBUG_FILTER"],
+        # "//lib/parser:yydebug-filter": ["YYDEBUG_FILTER"],
+        "//conditions:default":   []
+    }) + select({
+        "//lib/parser:debug-fpf?": ["YYDEBUG_FPF"],
+        # "//lib/parser:yydebug-fpf": ["YYDEBUG_FPF"],
+        "//conditions:default":   []
+    }) + select({
+        "//lib/parser:debug-fvf?": ["YYDEBUG_FVF"],
+        # "//lib/parser:lexdebug-fvf": ["YYDEBUG_FVF"],
+        "//conditions:default":   []
+    }) + select({
+        "//lib/parser:debug-build-filter?": ["YYDEBUG_BUILD_FILTER"],
+        # "//lib/parser:yydebug-build-filter": ["YYDEBUG_BUILD_FILTER"],
+        "//conditions:default":   []
+    }),
+    visibility = ["//lib/parser:__subpackages__",
+                  "//lib/lexer:__pkg__",
+                  "//test/unit:__subpackages__"]
+)
+

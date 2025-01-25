@@ -28,9 +28,9 @@ cc_library(
     includes = ["include"],
     # deps = [
     implementation_deps = [
+        "//lib/parser:opam_parser",
         "@liblogc//lib:logc",
         "@uthash//lib:uthash",
-        "//lib/parser:opam_parser",
     ],
     copts = COPTS + [
         "-I$(GENDIR)",
@@ -91,45 +91,3 @@ makeheaders(
     ],
     visibility = ["//visibility:public"]
 )
-
-################################################################
-## enable parser debugging: --//bootstrap:yydebug
-bool_flag(name = "yydebug", build_setting_default = 0)
-config_setting(name = "yydebug-enabled", flag_values = {":yydebug": "True"})
-config_setting(name = "yydebug-disabled", flag_values = {":yydebug": "False"})
-bool_flag(name = "yydebug-exit-on-error", build_setting_default = 0)
-config_setting(name = "yydebug-exit-on-error-enabled",
-               flag_values = {":yydebug-exit-on-error": "True"})
-
-bool_flag(name = "yytrace", build_setting_default = 0)
-config_setting(name = "yytrace-enabled", flag_values = {":yytrace": "True"})
-config_setting(name = "yytrace-disabled", flag_values = {":yytrace": "False"})
-
-## debug parse rules
-string_flag(name = "yydebug-rules", build_setting_default = "")
-config_setting(name = "yydebug-fpf",
-               flag_values = {":yydebug-rules": "fpf"})
-config_setting(name = "yydebug-fvf",
-               flag_values = {":yydebug-rules": "fvf"})
-config_setting(name = "yydebug-filter",
-               flag_values = {":yydebug-rules": "filter"})
-config_setting(name = "yydebug-build-filter",
-               flag_values = {":yydebug-rules": "build-filter"})
-
-## enable lexer debugging: --//bootstrap:lexdebug
-bool_flag(name = "lexdebug", build_setting_default = 0)
-config_setting(name = "lexdebug-enabled", flag_values = {":lexdebug": "True"})
-config_setting(name = "lexdebug-disabled", flag_values = {":lexdebug": "False"})
-
-string_flag(name = "lexdebug-rules", build_setting_default = "")
-config_setting(name = "lexdebug-version",
-               flag_values = {":lexdebug-rules": "version"})
-config_setting(name = "lexdebug-fpf",
-               flag_values = {":lexdebug-rules": "fpf"})
-config_setting(name = "lexdebug-fvf",
-               flag_values = {":lexdebug-rules": "fvf"})
-config_setting(name = "lexdebug-filter",
-               flag_values = {":lexdebug-rules": "filter"})
-config_setting(name = "lexdebug-build-filter",
-               flag_values = {":lexdebug-rules": "build-filter"})
-

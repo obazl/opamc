@@ -22,16 +22,16 @@
 #include "opamlexer.h"
 #include "lex_test.h"
 
-#define DEBUG_LEVEL opamc_lexis_debug
-extern  int  DEBUG_LEVEL;
-#define TRACE_FLAG opamc_lexis_trace
-extern  bool TRACE_FLAG;
+/* #define DEBUG_LEVEL debug_opamc_lexis */
+extern  int debug_opamc_lexis;
+/* #define TRACE_FLAG trace_opamc_lexis */
+extern  bool trace_opamc_lexis;
 
 int main(int argc, char *argv[])
 {
     int opt;
-    opamc_lexis_debug = 3;
-    opamc_lexis_trace = true;
+    debug_opamc_lexis = 3;
+    trace_opamc_lexis = true;
 
     UT_string *opam_file;
     utstring_new(opam_file);

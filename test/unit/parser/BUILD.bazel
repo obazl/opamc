@@ -1,0 +1,60 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
+
+CJSON_VERSION = "1.7.16"
+
+load("//config/cc:CONFIG.bzl", "BASE_COPTS")
+
+TIMEOUT = "short"
+
+test_suite(
+    name = "syntaxis",
+    tests = [
+        ":parser"
+    ]
+)
+########
+cc_test(
+    name       = "parser",
+    linkstatic = True,
+    srcs       = ["parser_test.c",
+                  "parser_test_init.c",
+                  ":mkhdrs"],
+    deps       = [
+        "//lib:opamc",
+        "@gopt//lib:gopt",
+        "@liblogc//lib:logc",
+        "@unity//lib:unity",
+        "@uthash//lib:uthash",
+    ],
+    copts      = BASE_COPTS + [
+        "-I$(GENDIR)/test/unit/parser",
+    ],
+    linkopts   = [],
+    timeout    = TIMEOUT,
+)
+
+############
+makeheaders(
+    name = "mkhdrs",
+    hdrs_srcs = ["parser_test.c",
+                 "parser_test_init.c"],
+    additional_srcs = [
+        "//lib:mkhdrs_export",
+        # "//lib/parser:opam_parser.c",
+    ] + select({
+        # "//lib/parser:dev?": [
+        #     "//lib/parser/syntaxis:opam_syntaxis.c"],
+        "//conditions:default": [
+            # "//lib/parser:opam_syntaxis.c"
+        ],
+    }) + select({
+        "@obazl_config_cc//profile:dev?": [
+            "@liblogc//macros:ansi_colors.h",
+            "@liblogc//macros:logging_debug.h",
+        ],
+        "//conditions:default": [
+            "@liblogc//macros:logging_ndebug.h",
+        ]
+    }),
+)

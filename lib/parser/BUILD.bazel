@@ -4,7 +4,6 @@ load("@bazel_skylib//rules:common_settings.bzl",
      "bool_flag", "string_flag")
 
 load("@makeheaders//rules:makeheaders.bzl", "makeheaders")
-load("@lemon//rules:lemon.bzl", "lemon")
 
 load("//config/cc:CONFIG.bzl",
      "BASE_COPTS",
@@ -17,15 +16,23 @@ COPTS         = BASE_COPTS
 DEPS          = BASE_DEPS
 LINKOPTS      = BASE_LINKOPTS
 
-exports_files(glob(["*.c"]))
+exports_files([
+    "opam_package.c",
+    "opam_parser.c",
+    "opam_syntaxis.c"
+])
 
-################################################################
-####    OPAM Parser
-################################################################
+######################################################
+## dev flag tells Bazel to regenerate the parser
+bool_flag(name = "dev", build_setting_default = False)
+config_setting(name = "dev?", flag_values = {":dev": "True"})
+
+###########
 cc_library(
     name = "opam_parser",
     srcs = [
         "opam_parser.c",
+        "opam_package.c",
         ":mkhdrs"
     ],
     implementation_deps = DEPS + [
@@ -42,10 +49,10 @@ cc_library(
         "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
         "//conditions:default": []
     }),
-    local_defines = ["LEXDEBUG"] + select({
-        ":lexdebug-enabled": ["LEXDEBUG"],
-        "//conditions:default":   []
-    }),
+    # local_defines = ["LEXDEBUG"] + select({
+    #     ":lexdebug-enabled": ["LEXDEBUG"],
+    #     "//conditions:default":   []
+    # }),
     visibility = [
         "//lib:__pkg__",
         "//extender:__pkg__",
@@ -56,81 +63,66 @@ cc_library(
 ###########
 cc_library(
     name = "opam_syntaxis",
-    srcs = [
-        "opam_syntaxis.c",
-        ":mkhdrs"
-    ],
-    implementation_deps = [
-        "@liblogc//lib:logc",
-        "@uthash//lib:uthash"
+    srcs = select({
+        ":dev?": [
+            "//lib/parser/syntaxis:opam_syntaxis.c",
+            ":mkhdrs"
+        ],
+        "//conditions:default": [
+            "opam_syntaxis.c",
+            "opam_syntaxis.h",
+        ],
+    }) + [
     ],
     copts = COPTS + [
         "-Wno-unused-variable",  # from lemon-generated code
         "-Wno-unused-parameter",  # from lemon-generated code
-
         "-I.", ## DO NOT REMOVE!!!
-
+        "-I$(GENDIR)/lib/parser",
+        "-Ilib/parser"
+    ],    implementation_deps = [
+        "@liblogc//lib:logc",
+        "@uthash//lib:uthash"
     ],
     defines = ["YYDEBUG"] + BASE_DEFINES + select({
         ## for strdup, strndup:
         "@platforms//os:linux": ["_POSIX_C_SOURCE=200809L"],
         "//conditions:default": []
     }) + select({
-        ":yydebug-enabled": ["YYDEBUG"],
+        "@lemon//parser:debug?": ["YYDEBUG"],
         "//conditions:default":   []
     }) + select({
-        ":yytrace-enabled": ["YYTRACE"],
+        "@lemon//parser:trace?": ["YYTRACE"],
         "//conditions:default":   []
     }),
     # to add: YYDEBUG_FILTER, etc.
     visibility = ["//test:__subpackages__"]
 )
 
-lemon(
-    name = "gen_opam_syntaxis",
-    yy   = "opam_syntaxis.y",
-    outs = ["opam_syntaxis.c","opam_syntaxis.out"],
-    compress = False,
-    ## NB: these are for lemon's %if, not cpp's #if
-    ## fvf = filtered version formula
-    ## fpf = filtered package formula
-    defines = ["YYDEBUG"
-        # "PROFILE_dev"
-        ] + select({
-        ":yydebug-enabled": ["YYDEBUG"],
-        "//conditions:default":   []
-    }) + select({
-        ":yydebug-exit-on-error-enabled": ["YYDEBUG_EXIT_ON_ERROR"],
-        "//conditions:default":   []
-    }) + select({
-        ":yydebug-filter": ["YYDEBUG_FILTER"],
-        "//conditions:default":   []
-    }) + select({
-        ":yydebug-fpf": ["YYDEBUG_FPF"],
-        "//conditions:default":   []
-    }) + select({
-        ":lexdebug-fvf": ["YYDEBUG_FVF"],
-        "//conditions:default":   []
-    }) + select({
-        ":yydebug-build-filter": ["YYDEBUG_BUILD_FILTER"],
-        "//conditions:default":   []
-    }),
-    visibility = ["//lib/hdrs:__pkg__", "//lib/lexer:__pkg__"]
-)
-
 ################################################################
 makeheaders(
     name = "mkhdrs",
     hdrs_srcs = [
-        # "opam_config.c",
-        # "cmd_runner.c",
         "opam_parser.c",
-        "opam_syntaxis.c", ## defines token_type constants
         "opam_package.c", ## ast node types, etc.
-    ],
-    additional_srcs = [
-        "//lib/lexer:opamlexer.h",
     ] + select({
+        "//lib/parser:dev?": [
+            "//lib/parser/syntaxis:opam_syntaxis.c"
+        ],
+        "//conditions:default": [
+            "opam_syntaxis.c"
+        ],
+    }),
+    additional_srcs = [
+        # "//lib/lexer:opamlexer.h",
+    ] + select({
+        "//lib/lexer:dev?": [
+            "//lib/lexer/lexis:opam_lexis.c",
+        ],
+        "//conditions:default": [
+            "//lib/lexer:opam_lexis.c",
+        ]
+    }) + select({
         "@obazl_config_cc//profile:dev?": [
             "@liblogc//macros:ansi_colors.h",
             "@liblogc//macros:logging_debug.h"
@@ -158,44 +150,54 @@ makeheaders(
 #     visibility = ["//visibility:public"]
 # )
 
-################################################################
-## enable parser debugging: --//bootstrap:yydebug
-bool_flag(name = "yydebug", build_setting_default = 0)
-config_setting(name = "yydebug-enabled", flag_values = {":yydebug": "True"})
-config_setting(name = "yydebug-disabled", flag_values = {":yydebug": "False"})
-bool_flag(name = "yydebug-exit-on-error", build_setting_default = 0)
-config_setting(name = "yydebug-exit-on-error-enabled",
-               flag_values = {":yydebug-exit-on-error": "True"})
 
-bool_flag(name = "yytrace", build_setting_default = 0)
-config_setting(name = "yytrace-enabled", flag_values = {":yytrace": "True"})
-config_setting(name = "yytrace-disabled", flag_values = {":yytrace": "False"})
+## generic debug flags go in @lemon//parser
+# bool_flag(name = "debug-exit-on-error", build_setting_default = 0)
+# config_setting(name = "debug-exit-on-error-enabled",
+#                flag_values = {":debug-exit-on-error": "True"})
 
-## debug parse rules
-string_flag(name = "yydebug-rules", build_setting_default = "")
-config_setting(name = "yydebug-fpf",
-               flag_values = {":yydebug-rules": "fpf"})
-config_setting(name = "yydebug-fvf",
-               flag_values = {":yydebug-rules": "fvf"})
-config_setting(name = "yydebug-filter",
-               flag_values = {":yydebug-rules": "filter"})
-config_setting(name = "yydebug-build-filter",
-               flag_values = {":yydebug-rules": "build-filter"})
+## debug flags specific to this grammar
+bool_flag(name = "debug-fpf", build_setting_default = False)
+config_setting(name = "debug-fpf?",
+               flag_values = {":debug-fpf": str(True)})
+               # flag_values = {":debug-rules": "fpf"})
 
-## enable lexer debugging: --//bootstrap:lexdebug
-bool_flag(name = "lexdebug", build_setting_default = 0)
-config_setting(name = "lexdebug-enabled", flag_values = {":lexdebug": "True"})
-config_setting(name = "lexdebug-disabled", flag_values = {":lexdebug": "False"})
+bool_flag(name = "debug-fvf", build_setting_default = False)
+config_setting(name = "debug-fvf?",
+               flag_values = {":debug-fvf": str(True)})
+               # flag_values = {":debug-rules": "fvf"})
 
-string_flag(name = "lexdebug-rules", build_setting_default = "")
-config_setting(name = "lexdebug-version",
-               flag_values = {":lexdebug-rules": "version"})
-config_setting(name = "lexdebug-fpf",
-               flag_values = {":lexdebug-rules": "fpf"})
-config_setting(name = "lexdebug-fvf",
-               flag_values = {":lexdebug-rules": "fvf"})
-config_setting(name = "lexdebug-filter",
-               flag_values = {":lexdebug-rules": "filter"})
-config_setting(name = "lexdebug-build-filter",
-               flag_values = {":lexdebug-rules": "build-filter"})
+bool_flag(name = "debug-filter", build_setting_default = False)
+config_setting(name = "debug-filter?",
+               flag_values = {":debug-filter": str(True)})
+               # flag_values = {":debug-rules": "filter"})
+
+bool_flag(name = "debug-build-filter", build_setting_default = False)
+config_setting(name = "debug-build-filter?",
+               flag_values = {":debug-build-filter": str(True)})
+
+
+# bool_flag(name = "yytrace", build_setting_default = 0)
+# config_setting(name = "yytrace-enabled", flag_values = {":yytrace": "True"})
+# config_setting(name = "yytrace-disabled", flag_values = {":yytrace": "False"})
+
+# ## debug parse rules
+# string_flag(name = "debug-rules", build_setting_default = "")
+
+# ## enable lexer debugging: --//bootstrap:lexdebug
+# bool_flag(name = "lexdebug", build_setting_default = 0)
+# config_setting(name = "lexdebug-enabled", flag_values = {":lexdebug": "True"})
+# config_setting(name = "lexdebug-disabled", flag_values = {":lexdebug": "False"})
+
+# string_flag(name = "lexdebug-rules", build_setting_default = "")
+# config_setting(name = "lexdebug-version",
+#                flag_values = {":lexdebug-rules": "version"})
+# config_setting(name = "lexdebug-fpf",
+#                flag_values = {":lexdebug-rules": "fpf"})
+# config_setting(name = "lexdebug-fvf",
+#                flag_values = {":lexdebug-rules": "fvf"})
+# config_setting(name = "lexdebug-filter",
+#                flag_values = {":lexdebug-rules": "filter"})
+# config_setting(name = "lexdebug-build-filter",
+#                flag_values = {":lexdebug-rules": "build-filter"})
 

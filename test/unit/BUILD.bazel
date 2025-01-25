@@ -1,0 +1,9 @@
+exports_files(["test_init.c"])
+
+test_suite(
+    name = "unit",
+    tests = [
+        "//test/unit/lexis",
+        "//test/unit/syntaxis",
+    ]
+)

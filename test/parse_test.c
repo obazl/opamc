@@ -25,12 +25,11 @@ UT_string *build_file;
 
 UT_string *buffer;
 
-#define DEBUG_LEVEL opamc_syntaxis_debug
-extern  int  DEBUG_LEVEL;
-extern  int  opamc_lexis_debug;
-#define TRACE_FLAG opamc_syntaxis_trace
-extern  bool TRACE_FLAG;
-extern  bool  opamc_lexis_trace;
+/* #define DEBUG_LEVEL debug_opamc_syntaxis */
+extern  int  debug_opamc_syntaxis;
+extern  int  debug_opamc_lexis;
+/* #define TRACE_FLAG trace_opamc_syntaxis */
+extern  bool  trace_opamc_syntaxis;
 
 int compareFiles(FILE *file1, FILE *file2)
 {
@@ -64,7 +63,9 @@ int main(int argc, char *argv[])
     /* opamc_trace = true; */
     /* opamc_debug = 2; */
 
-    opamc_syntaxis_debug = 1;
+    debug_opamc_syntaxis = 1;
+    trace_opamc_syntaxis = true;
+    debug_opamc_lexis    = 1;
 
     utstring_new(build_file);
 

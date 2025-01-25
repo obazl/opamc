@@ -2,4 +2,10 @@ try-import %workspace%/.config/registries.bazelrc
 common --registry=https://raw.githubusercontent.com/obazl/registry/main/
 common --registry=https://bcr.bazel.build
 
-try-import %workspace%/.config/user.bazelrc
+try-import .config/user.bazelrc
+
+## dev: add these to your ./config/user.bazelrc
+# common --//lib/lexer:debug
+# common --//lib/parser:debug
+# common --//lib/parser:debug-fpf
+# common --//lib/parser:debug-fvf
