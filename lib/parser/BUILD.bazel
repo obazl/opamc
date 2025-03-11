@@ -66,21 +66,19 @@ cc_library(
     srcs = select({
         ":dev?": [
             "//lib/parser/syntaxis:opam_syntaxis.c",
-            ":mkhdrs"
         ],
         "//conditions:default": [
             "opam_syntaxis.c",
-            "opam_syntaxis.h",
-        ],
-    }) + [
-    ],
+        ]
+    }) + [":mkhdrs"],
     copts = COPTS + [
         "-Wno-unused-variable",  # from lemon-generated code
         "-Wno-unused-parameter",  # from lemon-generated code
         "-I.", ## DO NOT REMOVE!!!
         "-I$(GENDIR)/lib/parser",
         "-Ilib/parser"
-    ],    implementation_deps = [
+    ],
+    implementation_deps = [
         "@liblogc//lib:logc",
         "@uthash//lib:uthash"
     ],
@@ -123,7 +121,7 @@ makeheaders(
             "//lib/lexer:opam_lexis.c",
         ]
     }) + select({
-        "@obazl_config_cc//profile:dev?": [
+        "@obazl_tools_cc//profile:dev?": [
             "@liblogc//macros:ansi_colors.h",
             "@liblogc//macros:logging_debug.h"
         ],

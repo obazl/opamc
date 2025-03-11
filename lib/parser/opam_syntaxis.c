@@ -49,9 +49,23 @@ int  DEBUG_LEVEL;
 #define TRACE_FLAG trace_opamc_syntaxis
 bool TRACE_FLAG;
 
-#line 53 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 29 "lib/parser/syntaxis/opam_syntaxis.y"
+
+struct opam_arg_s *p;
+#define DUMP_ARGS(args)                          \
+    LOG_DEBUG(0, "DUMPING args", "");           \
+    LOG_DEBUG(0, "args ct: %d",                 \
+                  utarray_len(args));              \
+    for(p=(struct opam_arg_s*)utarray_front(args); \
+        p!=NULL;                                  \
+        p=(struct opam_arg_s*)utarray_next(args,p)) {    \
+       LOG_DEBUG(0, "\tval: %s, type: %d", p->val, p->t); \
+     }
+    /* while ( (p=(char**)utarray_next(tok.args,p))) { \ */
+    /*     LOG_DEBUG(0, "\t%s",*p);             \ */
+    /* } */
+#line 68 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
 #include "opam_syntaxis.h"
-//lemp->filename "lib/parser/syntaxis/opam_syntaxis.y"
 /**************** End of %include directives **********************************/
 /* These constants specify the various numeric values for terminal symbols.
 ***************** Begin token definitions *************************************/
@@ -184,7 +198,7 @@ bool TRACE_FLAG;
 #endif
 /************* Begin control #defines *****************************************/
 #define YYCODETYPE unsigned char
-#define YYNOCODE 88
+#define YYNOCODE 87
 #define YYACTIONTYPE unsigned char
 #if INTERFACE
 #define ParseTOKENTYPE  union opam_token_u 
@@ -192,10 +206,10 @@ bool TRACE_FLAG;
 typedef union {
   int yyinit;
   ParseTOKENTYPE yy0;
-  struct opam_deps_s * yy26;
-  struct opam_binding_s * yy33;
-  UT_array * yy126;
-  struct opam_package_s * yy138;
+  UT_array * yy20;
+  struct opam_deps_s * yy80;
+  struct opam_package_s * yy122;
+  struct opam_binding_s * yy125;
 } YYMINORTYPE;
 #ifndef YYSTACKDEPTH
 #define YYSTACKDEPTH 100
@@ -212,18 +226,18 @@ typedef union {
 #define ParseCTX_FETCH
 #define ParseCTX_STORE
 #endif
-#define YYNSTATE             84
-#define YYNRULE              46
-#define YYNRULE_WITH_ACTION  46
+#define YYNSTATE             83
+#define YYNRULE              45
+#define YYNRULE_WITH_ACTION  45
 #define YYNTOKEN             70
-#define YY_MAX_SHIFT         83
-#define YY_MIN_SHIFTREDUCE   84
-#define YY_MAX_SHIFTREDUCE   129
-#define YY_ERROR_ACTION      130
-#define YY_ACCEPT_ACTION     131
-#define YY_NO_ACTION         132
-#define YY_MIN_REDUCE        133
-#define YY_MAX_REDUCE        178
+#define YY_MAX_SHIFT         82
+#define YY_MIN_SHIFTREDUCE   83
+#define YY_MAX_SHIFTREDUCE   127
+#define YY_ERROR_ACTION      128
+#define YY_ACCEPT_ACTION     129
+#define YY_NO_ACTION         130
+#define YY_MIN_REDUCE        131
+#define YY_MAX_REDUCE        175
 /************* End control #defines *******************************************/
 #define YY_NLOOKAHEAD ((int)(sizeof(yy_lookahead)/sizeof(yy_lookahead[0])))
 
@@ -290,112 +304,112 @@ typedef union {
 **  yy_default[]       Default action for each state.
 **
 *********** Begin parsing tables **********************************************/
-#define YY_ACTTAB_COUNT (301)
+#define YY_ACTTAB_COUNT (305)
 static const YYACTIONTYPE yy_action[] = {
- /*     0 */   133,  134,  131,   30,   68,   20,    7,   79,  134,  153,
- /*    10 */   152,   41,   74,  134,   76,  134,  153,  152,   48,   43,
- /*    20 */    51,  153,  152,  153,  152,   22,   23,   64,   64,   47,
- /*    30 */    61,   53,   78,  134,   83,  134,   54,   11,   58,   59,
- /*    40 */    62,  153,  152,  153,  152,  141,  140,    1,   16,   67,
- /*    50 */    14,  144,  141,  140,   77,  134,  163,  141,  140,  141,
- /*    60 */   140,  139,  178,  153,  152,  144,   57,  163,  139,  178,
- /*    70 */   168,  168,    9,  139,  178,  139,  178,  141,  140,  141,
- /*    80 */   140,   10,   24,   81,   18,  168,   39,   63,   15,    8,
- /*    90 */    56,   37,  168,  139,  178,  139,  178,  177,  138,  141,
- /*   100 */   140,   55,   33,  168,  177,  138,  137,  136,   13,  177,
- /*   110 */   138,  177,  138,  137,  136,  139,  178,  154,  137,  136,
- /*   120 */   137,  136,   12,   52,  154,   65,    2,   66,   79,  177,
- /*   130 */   138,  177,  138,   74,    2,   76,   29,  165,  137,  136,
- /*   140 */   137,  136,  135,  146,  146,   42,   45,    4,  175,  135,
- /*   150 */    15,  177,  138,   78,  135,   83,  135,   40,  146,  175,
- /*   160 */   137,  136,  175,  175,   34,   82,    3,    5,   15,  161,
- /*   170 */   161,  162,  162,  142,  135,   77,  135,  161,   24,  162,
- /*   180 */   145,  161,   35,  162,  161,    8,  162,  142,   14,   31,
- /*   190 */   160,  160,  159,  159,  145,  167,  135,  147,  160,    6,
- /*   200 */   159,   72,  160,   60,  159,  160,  167,  159,   25,  158,
- /*   210 */    50,   17,  147,  151,   25,  157,  158,  150,   25,  147,
- /*   220 */   158,   49,  157,  158,  143,  166,  157,  149,  151,  148,
- /*   230 */   147,   70,  150,   44,  164,  151,  166,   73,  143,  150,
- /*   240 */   155,  174,  149,  173,  148,  164,  151,  155,   19,  149,
- /*   250 */   150,  148,  174,  172,  173,   12,  174,   12,  173,  171,
- /*   260 */   149,  170,  148,   75,  172,   26,  176,  172,  172,   36,
- /*   270 */   171,   13,  170,  171,  171,  170,  170,  176,   13,   21,
- /*   280 */    12,  176,  169,  156,   24,   12,  169,   27,   28,   46,
- /*   290 */   156,    8,   12,   38,  156,   32,   80,   69,  132,  132,
- /*   300 */    71,
+ /*     0 */   131,  132,  129,   30,   48,   51,    4,   78,  132,  150,
+ /*    10 */   149,   41,   73,  132,   75,  132,  150,  149,   19,   43,
+ /*    20 */    63,  150,  149,  150,  149,   20,    1,   63,   47,   60,
+ /*    30 */    53,   54,   77,  132,   82,  132,   58,    8,   59,   61,
+ /*    40 */    13,  150,  149,  150,  149,  139,  138,   15,   66,   39,
+ /*    50 */    11,  142,  139,  138,   76,  132,  160,  139,  138,  139,
+ /*    60 */   138,  137,  175,  150,  149,  142,   57,  160,  137,  175,
+ /*    70 */   165,  165,    6,  137,  175,  137,  175,  139,  138,  139,
+ /*    80 */   138,    7,   21,   64,   65,  165,   45,   62,   67,    5,
+ /*    90 */    56,    2,  165,  137,  175,  137,  175,  174,  136,  139,
+ /*   100 */   138,   55,  162,  165,  174,  136,  135,  134,   10,  174,
+ /*   110 */   136,  174,  136,  135,  134,  137,  175,   80,  135,  134,
+ /*   120 */   135,  134,    9,   52,   23,   37,    2,   25,   78,  174,
+ /*   130 */   136,  174,  136,   73,  164,   75,   29,   42,  135,  134,
+ /*   140 */   135,  134,  133,   27,   12,  164,   69,   71,  172,  133,
+ /*   150 */   140,  174,  136,   77,  133,   82,  133,   40,   33,  172,
+ /*   160 */   135,  134,  172,  172,  140,   81,    3,   36,   12,  158,
+ /*   170 */   158,  159,  159,   12,  133,   76,  133,  158,   21,  159,
+ /*   180 */    14,  158,   34,  159,  158,    5,  159,   35,   11,   31,
+ /*   190 */   157,  157,  156,  156,   72,  163,  133,  144,  157,   16,
+ /*   200 */   156,   74,  157,   17,  156,  157,  163,  156,   22,  155,
+ /*   210 */    50,   24,  144,  148,   22,  154,  155,  147,   22,  144,
+ /*   220 */   155,   49,  154,  155,  143,  161,  154,  146,  148,  145,
+ /*   230 */   144,   26,  147,   44,  141,  148,  161,   28,  143,  147,
+ /*   240 */   151,  171,  146,  170,  145,   18,  148,  151,  141,  146,
+ /*   250 */   147,  145,  171,  169,  170,    9,  171,    9,  170,  168,
+ /*   260 */   146,  167,  145,  130,  169,   79,  173,  169,  169,   68,
+ /*   270 */   168,   10,  167,  168,  168,  167,  167,  173,   10,  130,
+ /*   280 */     9,  173,  166,  153,   21,    9,  166,  130,  130,   46,
+ /*   290 */   153,    5,    9,  152,  153,   32,  130,   38,  130,  130,
+ /*   300 */   152,  130,  130,  130,   70,
 };
 static const YYCODETYPE yy_lookahead[] = {
- /*     0 */     0,    0,   70,   71,   77,   78,   74,    7,    7,    0,
- /*    10 */     0,   71,   12,   12,   14,   14,    7,    7,   79,   83,
- /*    20 */    81,   12,   12,   14,   14,   84,   84,   86,   86,   72,
- /*    30 */    87,   87,   32,   32,   34,   34,   87,    4,   87,   87,
- /*    40 */    87,   32,   32,   34,   34,    0,    0,   80,   82,   79,
+ /*     0 */     0,    0,   70,   71,   79,   80,   74,    7,    7,    0,
+ /*    10 */     0,   71,   12,   12,   14,   14,    7,    7,   83,   82,
+ /*    20 */    85,   12,   12,   14,   14,   83,   78,   85,   72,   86,
+ /*    30 */    86,   86,   32,   32,   34,   34,   86,    4,   86,   86,
+ /*    40 */    81,   32,   32,   34,   34,    0,    0,   81,   79,   75,
  /*    50 */    35,   36,    7,    7,   54,   54,   38,   12,   12,   14,
  /*    60 */    14,    0,    0,   54,   54,   50,   33,   49,    7,    7,
  /*    70 */    35,   36,   39,   12,   12,   14,   14,   32,   32,   34,
- /*    80 */    34,   48,   39,   57,   82,   50,   75,   69,   36,   46,
- /*    90 */    57,   65,   57,   32,   32,   34,   34,    0,    0,   54,
- /*   100 */    54,   68,   50,   68,    7,    7,    0,    0,   38,   12,
- /*   110 */    12,   14,   14,    7,    7,   54,   54,   50,   12,   12,
- /*   120 */    14,   14,   52,   53,   57,   85,   38,   72,    7,   32,
+ /*    80 */    34,   48,   39,   84,   72,   50,   72,   69,   77,   46,
+ /*    90 */    57,   38,   57,   32,   32,   34,   34,    0,    0,   54,
+ /*   100 */    54,   68,   49,   68,    7,    7,    0,    0,   38,   12,
+ /*   110 */    12,   14,   14,    7,    7,   54,   54,   57,   12,   12,
+ /*   120 */    14,   14,   52,   53,   76,   65,   38,   76,    7,   32,
  /*   130 */    32,   34,   34,   12,   38,   14,   36,   49,   32,   32,
- /*   140 */    34,   34,    0,   35,   36,   49,   72,   76,   38,    7,
+ /*   140 */    34,   34,    0,   76,   36,   49,   57,   73,   38,    7,
  /*   150 */    36,   54,   54,   32,   12,   34,   14,   57,   50,   49,
- /*   160 */    54,   54,   52,   53,   50,   65,   35,   76,   36,   38,
+ /*   160 */    54,   54,   52,   53,   50,   65,   35,   65,   36,   38,
  /*   170 */    39,   38,   39,   36,   32,   54,   34,   46,   39,   46,
  /*   180 */    36,   50,   50,   50,   53,   46,   53,   50,   35,   50,
- /*   190 */    38,   39,   38,   39,   50,   38,   54,   35,   46,   76,
- /*   200 */    46,   73,   50,   50,   50,   53,   49,   53,   38,   39,
+ /*   190 */    38,   39,   38,   39,   10,   38,   54,   35,   46,   36,
+ /*   200 */    46,   10,   50,   50,   50,   53,   49,   53,   38,   39,
  /*   210 */    57,   36,   50,   35,   38,   39,   46,   35,   38,   57,
  /*   220 */    50,   68,   46,   53,   36,   38,   50,   35,   50,   35,
- /*   230 */    68,   57,   50,   53,   38,   57,   49,   10,   50,   57,
- /*   240 */    50,   38,   50,   38,   50,   49,   68,   57,   36,   57,
+ /*   230 */    68,   36,   50,   53,   36,   57,   49,   36,   50,   57,
+ /*   240 */    50,   38,   50,   38,   50,   10,   68,   57,   50,   57,
  /*   250 */    68,   57,   49,   38,   49,   52,   53,   52,   53,   38,
- /*   260 */    68,   38,   68,   10,   49,   36,   38,   52,   53,   65,
- /*   270 */    49,   38,   49,   52,   53,   52,   53,   49,   38,   10,
- /*   280 */    52,   53,   49,   39,   39,   52,   53,   36,   36,   49,
- /*   290 */    46,   46,   52,   50,   50,   50,   58,   58,   88,   88,
- /*   300 */    57,   88,   88,   88,   88,   88,   88,   88,   88,   88,
- /*   310 */    88,   88,   88,   88,   88,   88,   88,   88,   88,   88,
- /*   320 */    88,   88,   88,   88,   88,   88,   88,   88,   88,   88,
- /*   330 */    88,   88,   88,   88,   88,   88,   88,   88,   88,   88,
- /*   340 */    88,   88,   88,   88,   88,   88,   88,   88,   88,   88,
- /*   350 */    88,   88,   88,   88,   88,   88,   88,   88,   88,   88,
- /*   360 */    88,   88,   88,   88,   88,   88,   88,   88,   70,   70,
- /*   370 */    70,
+ /*   260 */    68,   38,   68,   87,   49,   58,   38,   52,   53,   58,
+ /*   270 */    49,   38,   49,   52,   53,   52,   53,   49,   38,   87,
+ /*   280 */    52,   53,   49,   39,   39,   52,   53,   87,   87,   49,
+ /*   290 */    46,   46,   52,   50,   50,   50,   87,   50,   87,   87,
+ /*   300 */    57,   87,   87,   87,   57,   87,   87,   87,   87,   87,
+ /*   310 */    87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+ /*   320 */    87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+ /*   330 */    87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+ /*   340 */    87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+ /*   350 */    87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+ /*   360 */    87,   87,   87,   87,   87,   87,   87,   87,   70,   70,
+ /*   370 */    70,   70,   70,   70,   70,
 };
-#define YY_SHIFT_COUNT    (83)
+#define YY_SHIFT_COUNT    (82)
 #define YY_SHIFT_MIN      (0)
-#define YY_SHIFT_MAX      (269)
+#define YY_SHIFT_MAX      (247)
 static const unsigned short int yy_shift_ofst[] = {
- /*     0 */   121,  153,   18,   18,   52,  114,  132,    0,  131,   33,
- /*    10 */    33,   33,   33,   33,   33,  162,  139,  244,  245,  244,
- /*    20 */    15,  100,   88,   96,   43,   43,  137,  137,  137,  174,
+ /*     0 */   121,  153,   18,   18,    0,  131,   33,   33,   33,   33,
+ /*    10 */    33,   33,  162,  139,  244,  245,  244,   15,  100,   53,
+ /*    20 */    88,   43,   43,  108,  114,  132,  114,  137,  114,   89,
  /*    30 */     1,    9,   10,   45,   46,   61,   62,   97,   98,  106,
  /*    40 */   107,  142,  133,  152,  154,  170,   35,  176,  178,  182,
  /*    50 */   192,  194,  110,  203,  205,  215,  221,  223,  228,  233,
- /*    60 */   108,   70,  240,  157,  187,  196,  180,  144,  188,   26,
- /*    70 */    67,  190,  243,  175,  227,  212,  253,  229,  251,  252,
- /*    80 */   204,  238,  239,  269,
+ /*    60 */    70,  240,   96,  157,  187,  180,  188,  198,   60,  190,
+ /*    70 */   243,  247,  144,  184,  163,  191,  175,  195,  201,  102,
+ /*    80 */   207,  211,  235,
 };
 #define YY_REDUCE_COUNT (29)
-#define YY_REDUCE_MIN   (-73)
-#define YY_REDUCE_MAX   (128)
-static const short yy_reduce_ofst[] = {
- /*     0 */   -68,  -61,  -59,  -58,  -73,  -73,  -73,  -60,  -64,  -57,
- /*    10 */   -56,  -51,  -49,  -48,  -47,  -33,  -43,  -34,  -43,    2,
- /*    20 */   -30,   11,   40,   40,   55,   74,   71,   91,  123,  128,
+#define YY_REDUCE_MIN   (-75)
+#define YY_REDUCE_MAX   (74)
+static const signed char yy_reduce_ofst[] = {
+ /*     0 */   -68,  -75,  -65,  -58,  -60,  -63,  -57,  -56,  -55,  -50,
+ /*    10 */   -48,  -47,  -52,  -44,  -41,  -44,  -34,  -31,  -26,   -1,
+ /*    20 */    -1,   12,   14,   11,   48,   11,   51,   11,   67,   74,
 };
 static const YYACTIONTYPE yy_default[] = {
- /*     0 */   130,  130,  130,  130,  130,  130,  130,  130,  130,  130,
- /*    10 */   130,  130,  130,  130,  130,  130,  130,  130,  130,  130,
- /*    20 */   130,  130,  130,  130,  130,  130,  130,  130,  130,  130,
- /*    30 */   130,  130,  130,  130,  130,  130,  130,  130,  130,  130,
- /*    40 */   130,  130,  130,  130,  130,  130,  130,  130,  130,  130,
- /*    50 */   130,  130,  130,  130,  130,  130,  130,  130,  130,  130,
- /*    60 */   130,  130,  130,  130,  130,  130,  130,  130,  130,  130,
- /*    70 */   130,  130,  130,  130,  130,  130,  130,  130,  130,  130,
- /*    80 */   130,  130,  130,  130,
+ /*     0 */   128,  128,  128,  128,  128,  128,  128,  128,  128,  128,
+ /*    10 */   128,  128,  128,  128,  128,  128,  128,  128,  128,  128,
+ /*    20 */   128,  128,  128,  128,  128,  128,  128,  128,  128,  128,
+ /*    30 */   128,  128,  128,  128,  128,  128,  128,  128,  128,  128,
+ /*    40 */   128,  128,  128,  128,  128,  128,  128,  128,  128,  128,
+ /*    50 */   128,  128,  128,  128,  128,  128,  128,  128,  128,  128,
+ /*    60 */   128,  128,  128,  128,  128,  128,  128,  128,  128,  128,
+ /*    70 */   128,  128,  128,  128,  128,  128,  128,  128,  128,  128,
+ /*    80 */   128,  128,  128,
 };
 /********** End of lemon-generated parsing tables *****************************/
 
@@ -579,18 +593,17 @@ static const char *const yyTokenName[] = {
   /*   73 */ "stringlist",
   /*   74 */ "bindings",
   /*   75 */ "string3",
-  /*   76 */ "cmdset",
-  /*   77 */ "cmdspec",
-  /*   78 */ "cmd",
+  /*   76 */ "cmdlist",
+  /*   77 */ "cmd",
+  /*   78 */ "args",
   /*   79 */ "filter",
-  /*   80 */ "args",
-  /*   81 */ "arg",
-  /*   82 */ "filtered_package_formulas",
-  /*   83 */ "fvf_expr",
-  /*   84 */ "fvf",
-  /*   85 */ "logop_fvf",
-  /*   86 */ "fvf_base",
-  /*   87 */ "pred",
+  /*   80 */ "arg",
+  /*   81 */ "filtered_package_formulas",
+  /*   82 */ "fvf_expr",
+  /*   83 */ "fvf",
+  /*   84 */ "logop_fvf",
+  /*   85 */ "fvf_base",
+  /*   86 */ "pred",
 };
 #endif /* defined(YYCOVERAGE) || !defined(NDEBUG) */
 
@@ -604,46 +617,45 @@ static const char *const yyRuleName[] = {
  /*   3 */ "binding ::= KEYWORD COLON STRING",
  /*   4 */ "binding ::= KEYWORD COLON string3",
  /*   5 */ "binding ::= KEYWORD COLON LBRACKET stringlist RBRACKET",
- /*   6 */ "binding ::= BUILD LBRACKET cmdset RBRACKET",
- /*   7 */ "binding ::= INSTALL LBRACKET cmdset RBRACKET",
- /*   8 */ "binding ::= RUNTEST LBRACKET cmdset RBRACKET",
- /*   9 */ "cmdset ::=",
- /*  10 */ "cmdset ::= cmdset cmdspec",
- /*  11 */ "cmdspec ::= cmd",
- /*  12 */ "cmdspec ::= cmd filter",
- /*  13 */ "cmd ::= LBRACKET args RBRACKET",
- /*  14 */ "args ::=",
- /*  15 */ "args ::= args arg",
- /*  16 */ "arg ::= STRING",
- /*  17 */ "arg ::= VARIDENT",
- /*  18 */ "arg ::= filter",
- /*  19 */ "binding ::= DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET",
- /*  20 */ "binding ::= CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET",
- /*  21 */ "stringlist ::= STRING",
- /*  22 */ "stringlist ::= stringlist STRING",
- /*  23 */ "filtered_package_formulas ::=",
- /*  24 */ "filtered_package_formulas ::= filtered_package_formulas fpf",
- /*  25 */ "fpf ::= fpf LOGOP fpf",
- /*  26 */ "fpf ::= LPAREN fpf RPAREN",
- /*  27 */ "fpf ::= PKGNAME fvf_expr",
- /*  28 */ "fpf ::= PKGNAME",
- /*  29 */ "fvf_expr ::= LBRACE fvf RBRACE",
- /*  30 */ "fvf ::=",
- /*  31 */ "fvf ::= fvf logop_fvf",
- /*  32 */ "logop_fvf ::= LOGOP fvf",
- /*  33 */ "fvf ::= fvf_base",
- /*  34 */ "fvf_base ::= VERSION",
- /*  35 */ "filter ::= LBRACE pred RBRACE",
- /*  36 */ "pred ::= pred LOGOP pred",
- /*  37 */ "pred ::= INT",
- /*  38 */ "pred ::= STRING",
- /*  39 */ "pred ::= VARIDENT",
- /*  40 */ "pred ::= BANG pred",
- /*  41 */ "pred ::= QMARK pred",
- /*  42 */ "pred ::= LPAREN pred RPAREN",
- /*  43 */ "pred ::= pred RELOP pred",
- /*  44 */ "string3 ::= TQ STRING3 TQ",
- /*  45 */ "string3 ::= TQ STRING3 STRING STRING3 TQ",
+ /*   6 */ "binding ::= BUILD LBRACKET cmdlist RBRACKET",
+ /*   7 */ "binding ::= INSTALL LBRACKET cmdlist RBRACKET",
+ /*   8 */ "binding ::= RUNTEST LBRACKET cmdlist RBRACKET",
+ /*   9 */ "cmdlist ::=",
+ /*  10 */ "cmdlist ::= cmdlist cmd",
+ /*  11 */ "cmd ::= LBRACKET args RBRACKET",
+ /*  12 */ "cmd ::= LBRACKET args RBRACKET filter",
+ /*  13 */ "args ::=",
+ /*  14 */ "args ::= args arg",
+ /*  15 */ "arg ::= STRING",
+ /*  16 */ "arg ::= VARIDENT",
+ /*  17 */ "arg ::= filter",
+ /*  18 */ "binding ::= DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET",
+ /*  19 */ "binding ::= CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET",
+ /*  20 */ "stringlist ::= STRING",
+ /*  21 */ "stringlist ::= stringlist STRING",
+ /*  22 */ "filtered_package_formulas ::=",
+ /*  23 */ "filtered_package_formulas ::= filtered_package_formulas fpf",
+ /*  24 */ "fpf ::= fpf LOGOP fpf",
+ /*  25 */ "fpf ::= LPAREN fpf RPAREN",
+ /*  26 */ "fpf ::= PKGNAME fvf_expr",
+ /*  27 */ "fpf ::= PKGNAME",
+ /*  28 */ "fvf_expr ::= LBRACE fvf RBRACE",
+ /*  29 */ "fvf ::=",
+ /*  30 */ "fvf ::= fvf logop_fvf",
+ /*  31 */ "logop_fvf ::= LOGOP fvf",
+ /*  32 */ "fvf ::= fvf_base",
+ /*  33 */ "fvf_base ::= VERSION",
+ /*  34 */ "filter ::= LBRACE pred RBRACE",
+ /*  35 */ "pred ::= pred LOGOP pred",
+ /*  36 */ "pred ::= INT",
+ /*  37 */ "pred ::= STRING",
+ /*  38 */ "pred ::= VARIDENT",
+ /*  39 */ "pred ::= BANG pred",
+ /*  40 */ "pred ::= QMARK pred",
+ /*  41 */ "pred ::= LPAREN pred RPAREN",
+ /*  42 */ "pred ::= pred RELOP pred",
+ /*  43 */ "string3 ::= TQ STRING3 TQ",
+ /*  44 */ "string3 ::= TQ STRING3 STRING STRING3 TQ",
 };
 #endif /* NDEBUG */
 
@@ -1061,46 +1073,45 @@ static const YYCODETYPE yyRuleInfoLhs[] = {
     71,  /* (3) binding ::= KEYWORD COLON STRING */
     71,  /* (4) binding ::= KEYWORD COLON string3 */
     71,  /* (5) binding ::= KEYWORD COLON LBRACKET stringlist RBRACKET */
-    71,  /* (6) binding ::= BUILD LBRACKET cmdset RBRACKET */
-    71,  /* (7) binding ::= INSTALL LBRACKET cmdset RBRACKET */
-    71,  /* (8) binding ::= RUNTEST LBRACKET cmdset RBRACKET */
-    76,  /* (9) cmdset ::= */
-    76,  /* (10) cmdset ::= cmdset cmdspec */
-    77,  /* (11) cmdspec ::= cmd */
-    77,  /* (12) cmdspec ::= cmd filter */
-    78,  /* (13) cmd ::= LBRACKET args RBRACKET */
-    80,  /* (14) args ::= */
-    80,  /* (15) args ::= args arg */
-    81,  /* (16) arg ::= STRING */
-    81,  /* (17) arg ::= VARIDENT */
-    81,  /* (18) arg ::= filter */
-    71,  /* (19) binding ::= DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET */
-    71,  /* (20) binding ::= CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET */
-    73,  /* (21) stringlist ::= STRING */
-    73,  /* (22) stringlist ::= stringlist STRING */
-    82,  /* (23) filtered_package_formulas ::= */
-    82,  /* (24) filtered_package_formulas ::= filtered_package_formulas fpf */
-    72,  /* (25) fpf ::= fpf LOGOP fpf */
-    72,  /* (26) fpf ::= LPAREN fpf RPAREN */
-    72,  /* (27) fpf ::= PKGNAME fvf_expr */
-    72,  /* (28) fpf ::= PKGNAME */
-    83,  /* (29) fvf_expr ::= LBRACE fvf RBRACE */
-    84,  /* (30) fvf ::= */
-    84,  /* (31) fvf ::= fvf logop_fvf */
-    85,  /* (32) logop_fvf ::= LOGOP fvf */
-    84,  /* (33) fvf ::= fvf_base */
-    86,  /* (34) fvf_base ::= VERSION */
-    79,  /* (35) filter ::= LBRACE pred RBRACE */
-    87,  /* (36) pred ::= pred LOGOP pred */
-    87,  /* (37) pred ::= INT */
-    87,  /* (38) pred ::= STRING */
-    87,  /* (39) pred ::= VARIDENT */
-    87,  /* (40) pred ::= BANG pred */
-    87,  /* (41) pred ::= QMARK pred */
-    87,  /* (42) pred ::= LPAREN pred RPAREN */
-    87,  /* (43) pred ::= pred RELOP pred */
-    75,  /* (44) string3 ::= TQ STRING3 TQ */
-    75,  /* (45) string3 ::= TQ STRING3 STRING STRING3 TQ */
+    71,  /* (6) binding ::= BUILD LBRACKET cmdlist RBRACKET */
+    71,  /* (7) binding ::= INSTALL LBRACKET cmdlist RBRACKET */
+    71,  /* (8) binding ::= RUNTEST LBRACKET cmdlist RBRACKET */
+    76,  /* (9) cmdlist ::= */
+    76,  /* (10) cmdlist ::= cmdlist cmd */
+    77,  /* (11) cmd ::= LBRACKET args RBRACKET */
+    77,  /* (12) cmd ::= LBRACKET args RBRACKET filter */
+    78,  /* (13) args ::= */
+    78,  /* (14) args ::= args arg */
+    80,  /* (15) arg ::= STRING */
+    80,  /* (16) arg ::= VARIDENT */
+    80,  /* (17) arg ::= filter */
+    71,  /* (18) binding ::= DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET */
+    71,  /* (19) binding ::= CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET */
+    73,  /* (20) stringlist ::= STRING */
+    73,  /* (21) stringlist ::= stringlist STRING */
+    81,  /* (22) filtered_package_formulas ::= */
+    81,  /* (23) filtered_package_formulas ::= filtered_package_formulas fpf */
+    72,  /* (24) fpf ::= fpf LOGOP fpf */
+    72,  /* (25) fpf ::= LPAREN fpf RPAREN */
+    72,  /* (26) fpf ::= PKGNAME fvf_expr */
+    72,  /* (27) fpf ::= PKGNAME */
+    82,  /* (28) fvf_expr ::= LBRACE fvf RBRACE */
+    83,  /* (29) fvf ::= */
+    83,  /* (30) fvf ::= fvf logop_fvf */
+    84,  /* (31) logop_fvf ::= LOGOP fvf */
+    83,  /* (32) fvf ::= fvf_base */
+    85,  /* (33) fvf_base ::= VERSION */
+    79,  /* (34) filter ::= LBRACE pred RBRACE */
+    86,  /* (35) pred ::= pred LOGOP pred */
+    86,  /* (36) pred ::= INT */
+    86,  /* (37) pred ::= STRING */
+    86,  /* (38) pred ::= VARIDENT */
+    86,  /* (39) pred ::= BANG pred */
+    86,  /* (40) pred ::= QMARK pred */
+    86,  /* (41) pred ::= LPAREN pred RPAREN */
+    86,  /* (42) pred ::= pred RELOP pred */
+    75,  /* (43) string3 ::= TQ STRING3 TQ */
+    75,  /* (44) string3 ::= TQ STRING3 STRING STRING3 TQ */
 };
 
 /* For rule J, yyRuleInfoNRhs[J] contains the negative of the number
@@ -1112,46 +1123,45 @@ static const signed char yyRuleInfoNRhs[] = {
    -3,  /* (3) binding ::= KEYWORD COLON STRING */
    -3,  /* (4) binding ::= KEYWORD COLON string3 */
    -5,  /* (5) binding ::= KEYWORD COLON LBRACKET stringlist RBRACKET */
-   -4,  /* (6) binding ::= BUILD LBRACKET cmdset RBRACKET */
-   -4,  /* (7) binding ::= INSTALL LBRACKET cmdset RBRACKET */
-   -4,  /* (8) binding ::= RUNTEST LBRACKET cmdset RBRACKET */
-    0,  /* (9) cmdset ::= */
-   -2,  /* (10) cmdset ::= cmdset cmdspec */
-   -1,  /* (11) cmdspec ::= cmd */
-   -2,  /* (12) cmdspec ::= cmd filter */
-   -3,  /* (13) cmd ::= LBRACKET args RBRACKET */
-    0,  /* (14) args ::= */
-   -2,  /* (15) args ::= args arg */
-   -1,  /* (16) arg ::= STRING */
-   -1,  /* (17) arg ::= VARIDENT */
-   -1,  /* (18) arg ::= filter */
-   -5,  /* (19) binding ::= DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET */
-   -5,  /* (20) binding ::= CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET */
-   -1,  /* (21) stringlist ::= STRING */
-   -2,  /* (22) stringlist ::= stringlist STRING */
-    0,  /* (23) filtered_package_formulas ::= */
-   -2,  /* (24) filtered_package_formulas ::= filtered_package_formulas fpf */
-   -3,  /* (25) fpf ::= fpf LOGOP fpf */
-   -3,  /* (26) fpf ::= LPAREN fpf RPAREN */
-   -2,  /* (27) fpf ::= PKGNAME fvf_expr */
-   -1,  /* (28) fpf ::= PKGNAME */
-   -3,  /* (29) fvf_expr ::= LBRACE fvf RBRACE */
-    0,  /* (30) fvf ::= */
-   -2,  /* (31) fvf ::= fvf logop_fvf */
-   -2,  /* (32) logop_fvf ::= LOGOP fvf */
-   -1,  /* (33) fvf ::= fvf_base */
-   -1,  /* (34) fvf_base ::= VERSION */
-   -3,  /* (35) filter ::= LBRACE pred RBRACE */
-   -3,  /* (36) pred ::= pred LOGOP pred */
-   -1,  /* (37) pred ::= INT */
-   -1,  /* (38) pred ::= STRING */
-   -1,  /* (39) pred ::= VARIDENT */
-   -2,  /* (40) pred ::= BANG pred */
-   -2,  /* (41) pred ::= QMARK pred */
-   -3,  /* (42) pred ::= LPAREN pred RPAREN */
-   -3,  /* (43) pred ::= pred RELOP pred */
-   -3,  /* (44) string3 ::= TQ STRING3 TQ */
-   -5,  /* (45) string3 ::= TQ STRING3 STRING STRING3 TQ */
+   -4,  /* (6) binding ::= BUILD LBRACKET cmdlist RBRACKET */
+   -4,  /* (7) binding ::= INSTALL LBRACKET cmdlist RBRACKET */
+   -4,  /* (8) binding ::= RUNTEST LBRACKET cmdlist RBRACKET */
+    0,  /* (9) cmdlist ::= */
+   -2,  /* (10) cmdlist ::= cmdlist cmd */
+   -3,  /* (11) cmd ::= LBRACKET args RBRACKET */
+   -4,  /* (12) cmd ::= LBRACKET args RBRACKET filter */
+    0,  /* (13) args ::= */
+   -2,  /* (14) args ::= args arg */
+   -1,  /* (15) arg ::= STRING */
+   -1,  /* (16) arg ::= VARIDENT */
+   -1,  /* (17) arg ::= filter */
+   -5,  /* (18) binding ::= DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET */
+   -5,  /* (19) binding ::= CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET */
+   -1,  /* (20) stringlist ::= STRING */
+   -2,  /* (21) stringlist ::= stringlist STRING */
+    0,  /* (22) filtered_package_formulas ::= */
+   -2,  /* (23) filtered_package_formulas ::= filtered_package_formulas fpf */
+   -3,  /* (24) fpf ::= fpf LOGOP fpf */
+   -3,  /* (25) fpf ::= LPAREN fpf RPAREN */
+   -2,  /* (26) fpf ::= PKGNAME fvf_expr */
+   -1,  /* (27) fpf ::= PKGNAME */
+   -3,  /* (28) fvf_expr ::= LBRACE fvf RBRACE */
+    0,  /* (29) fvf ::= */
+   -2,  /* (30) fvf ::= fvf logop_fvf */
+   -2,  /* (31) logop_fvf ::= LOGOP fvf */
+   -1,  /* (32) fvf ::= fvf_base */
+   -1,  /* (33) fvf_base ::= VERSION */
+   -3,  /* (34) filter ::= LBRACE pred RBRACE */
+   -3,  /* (35) pred ::= pred LOGOP pred */
+   -1,  /* (36) pred ::= INT */
+   -1,  /* (37) pred ::= STRING */
+   -1,  /* (38) pred ::= VARIDENT */
+   -2,  /* (39) pred ::= BANG pred */
+   -2,  /* (40) pred ::= QMARK pred */
+   -3,  /* (41) pred ::= LPAREN pred RPAREN */
+   -3,  /* (42) pred ::= pred RELOP pred */
+   -3,  /* (43) string3 ::= TQ STRING3 TQ */
+   -5,  /* (44) string3 ::= TQ STRING3 STRING STRING3 TQ */
 };
 
 static void yy_accept(yyParser*);  /* Forward Declaration */
@@ -1243,406 +1253,462 @@ static YYACTIONTYPE yy_reduce(
 /********** Begin reduce actions **********************************************/
         YYMINORTYPE yylhsminor;
       case 0: /* package ::= bindings */
-#line 164 "lib/parser/syntaxis/opam_syntaxis.y"
+#line 180 "lib/parser/syntaxis/opam_syntaxis.y"
 {
-    LOG_DEBUG(0, "PACKAGE", "");
+    LOG_DEBUG(0, "Pkg src: %s", opam_parse_state->pkg->src);
     LOG_DEBUG(0, " bindings ct: %d",
-              HASH_CNT(hh, opam_parse_state->pkg->entries));
+              HASH_CNT(hh, opam_parse_state->pkg->bindings));
+    struct opam_binding_s *b;
+    for (b = opam_parse_state->pkg->bindings;
+         b != NULL;
+         b = b->hh.next) {
+        LOG_DEBUG(0, "\t%s:", b->name);
+    }
 }
-#line 1253 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1269 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
       case 1: /* bindings ::= binding */
-#line 170 "lib/parser/syntaxis/opam_syntaxis.y"
+#line 192 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "One binding", "");
 }
-#line 1260 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1276 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
       case 2: /* bindings ::= bindings binding */
-#line 174 "lib/parser/syntaxis/opam_syntaxis.y"
+#line 199 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "BINDINGS ct: %d",
-           HASH_CNT(hh, opam_parse_state->pkg->entries));
-    /* no need to do anything, opam_parse_state->pkg->entries already
+           HASH_CNT(hh, opam_parse_state->pkg->bindings));
+    /* no need to do anything, opam_parse_state->pkg->bindings already
        contains all bindings */
     yylhsminor.yy0 = yymsp[-1].minor.yy0;
 }
-#line 1271 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1287 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
   yymsp[-1].minor.yy0 = yylhsminor.yy0;
         break;
       case 3: /* binding ::= KEYWORD COLON STRING */
       case 4: /* binding ::= KEYWORD COLON string3 */ yytestcase(yyruleno==4);
-#line 185 "lib/parser/syntaxis/opam_syntaxis.y"
+#line 207 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "BINDING: %s: %s", yymsp[-2].minor.yy0.s, yymsp[0].minor.yy0.s);
     /* create a binding and add it to the pkg hashmap */
-    yylhsminor.yy33 = calloc(sizeof(struct opam_binding_s), 1);
-    yylhsminor.yy33->name = yymsp[-2].minor.yy0.s;
-    yylhsminor.yy33->t = BINDING_STRING;
-    yylhsminor.yy33->val = strdup(yymsp[0].minor.yy0.s);
-    HASH_ADD_KEYPTR(hh, // opam_parse_state->pkg->entries->hh,
-                    opam_parse_state->pkg->entries,
-                    yylhsminor.yy33->name, strlen(yylhsminor.yy33->name), yylhsminor.yy33);
+    yylhsminor.yy125 = calloc(sizeof(struct opam_binding_s), 1);
+    yylhsminor.yy125->name = yymsp[-2].minor.yy0.s;
+    yylhsminor.yy125->t = BINDING_STRING;
+    yylhsminor.yy125->val = strdup(yymsp[0].minor.yy0.s);
+    HASH_ADD_KEYPTR(hh, // opam_parse_state->pkg->bindings->hh,
+                    opam_parse_state->pkg->bindings,
+                    yylhsminor.yy125->name, strlen(yylhsminor.yy125->name), yylhsminor.yy125);
 }
-#line 1288 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-  yymsp[-2].minor.yy33 = yylhsminor.yy33;
+#line 1304 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+  yymsp[-2].minor.yy125 = yylhsminor.yy125;
         break;
       case 5: /* binding ::= KEYWORD COLON LBRACKET stringlist RBRACKET */
-#line 209 "lib/parser/syntaxis/opam_syntaxis.y"
-{
-    LOG_DEBUG(0, "BINDING stringlist %s, ct: %d",
-           yymsp[-4].minor.yy0.s, utarray_len(yymsp[-1].minor.yy126));
-    /* create a binding and add it to the pkg hashmap */
-    yylhsminor.yy33 = calloc(sizeof(struct opam_binding_s), 1);
-    yylhsminor.yy33->name = yymsp[-4].minor.yy0.s;
-    yylhsminor.yy33->t = BINDING_STRINGLIST;
-    yylhsminor.yy33->val = (void*)yymsp[-1].minor.yy126;
-    HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
-                    yylhsminor.yy33->name, strlen(yylhsminor.yy33->name), yylhsminor.yy33);
-#if YYDEBUG
-    LOG_DEBUG(0, "BINDING stringlist val ct: %d",
-           utarray_len((UT_array*)yylhsminor.yy33->val));
-#endif
-}
-#line 1309 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-  yymsp[-4].minor.yy33 = yylhsminor.yy33;
-        break;
-      case 6: /* binding ::= BUILD LBRACKET cmdset RBRACKET */
 #line 231 "lib/parser/syntaxis/opam_syntaxis.y"
 {
-    LOG_DEBUG(0, "BINDING build", "");
-    /* opam_parse_state->pkg->entries, */
-    yymsp[-3].minor.yy33 = calloc(sizeof(struct opam_binding_s), 1);
-    yymsp[-3].minor.yy33->name = strndup("build", 5);
-    yymsp[-3].minor.yy33->t = BINDING_BUILD;
-    /* yymsp[-3].minor.yy33->val =  */
+    LOG_DEBUG(0, "BINDING stringlist %s, ct: %d",
+           yymsp[-4].minor.yy0.s, utarray_len(yymsp[-1].minor.yy20));
+    /* create a binding and add it to the pkg hashmap */
+    yylhsminor.yy125 = calloc(sizeof(struct opam_binding_s), 1);
+    yylhsminor.yy125->name = yymsp[-4].minor.yy0.s;
+    yylhsminor.yy125->t = BINDING_STRINGLIST;
+    yylhsminor.yy125->val = (void*)yymsp[-1].minor.yy20;
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
-                    yymsp[-3].minor.yy33->name, strlen(yymsp[-3].minor.yy33->name), yymsp[-3].minor.yy33);
+                    opam_parse_state->pkg->bindings,
+                    yylhsminor.yy125->name, strlen(yylhsminor.yy125->name), yylhsminor.yy125);
+#if YYDEBUG
+    LOG_DEBUG(0, "BINDING stringlist val ct: %d",
+           utarray_len((UT_array*)yylhsminor.yy125->val));
+#endif
 }
 #line 1325 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+  yymsp[-4].minor.yy125 = yylhsminor.yy125;
         break;
-      case 7: /* binding ::= INSTALL LBRACKET cmdset RBRACKET */
-#line 244 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 6: /* binding ::= BUILD LBRACKET cmdlist RBRACKET */
+#line 253 "lib/parser/syntaxis/opam_syntaxis.y"
+{
+    LOG_DEBUG(0, "build [cmdlist]", "");
+    // for each cmd in cmdlist, print the args
+    struct opam_cmd_s *cmd = NULL;
+    for(cmd=(struct opam_cmd_s*)utarray_front(yymsp[-1].minor.yy0.cmds);
+        cmd!=NULL;
+        cmd=(struct opam_cmd_s*)utarray_next(yymsp[-1].minor.yy0.cmds, cmd)) {
+        int ct = utarray_len(cmd->args);
+        LOG_DEBUG(0, "cmd args ct: %d", ct);
+        struct opam_arg_s *arg = NULL;
+        for(arg=(struct opam_arg_s*)utarray_front(cmd->args);
+            arg!=NULL;
+            arg=(struct opam_arg_s*)utarray_next(cmd->args, arg)) {
+            LOG_DEBUG(0, "\t%s", arg->val);
+        }
+    }
+    /* opam_parse_state->pkg->bindings, */
+    yymsp[-3].minor.yy125 = calloc(sizeof(struct opam_binding_s), 1);
+    yymsp[-3].minor.yy125->name = strndup("build", 5);
+    yymsp[-3].minor.yy125->t = BINDING_BUILD;
+    yymsp[-3].minor.yy125->val = yymsp[-1].minor.yy0.cmds;
+    HASH_ADD_KEYPTR(hh,
+                    opam_parse_state->pkg->bindings,
+                    yymsp[-3].minor.yy125->name, strlen(yymsp[-3].minor.yy125->name), yymsp[-3].minor.yy125);
+}
+#line 1355 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+        break;
+      case 7: /* binding ::= INSTALL LBRACKET cmdlist RBRACKET */
+#line 280 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "BINDING install", "");
-    yymsp[-3].minor.yy33 = calloc(sizeof(struct opam_binding_s), 1);
-    yymsp[-3].minor.yy33->name = strndup("install", 7);
-    yymsp[-3].minor.yy33->t = BINDING_BUILD;
-    /* yymsp[-3].minor.yy33->val =  */
+    yymsp[-3].minor.yy125 = calloc(sizeof(struct opam_binding_s), 1);
+    yymsp[-3].minor.yy125->name = strndup("install", 7);
+    yymsp[-3].minor.yy125->t = BINDING_BUILD;
+    /* yymsp[-3].minor.yy125->val =  */
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
-                    yymsp[-3].minor.yy33->name, strlen(yymsp[-3].minor.yy33->name), yymsp[-3].minor.yy33);
+                    opam_parse_state->pkg->bindings,
+                    yymsp[-3].minor.yy125->name, strlen(yymsp[-3].minor.yy125->name), yymsp[-3].minor.yy125);
 }
-#line 1339 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1369 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 8: /* binding ::= RUNTEST LBRACKET cmdset RBRACKET */
-#line 256 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 8: /* binding ::= RUNTEST LBRACKET cmdlist RBRACKET */
+#line 292 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "BINDING run-test", "");
-    yymsp[-3].minor.yy33 = calloc(sizeof(struct opam_binding_s), 1);
-    yymsp[-3].minor.yy33->name = strndup("run-test", 8);
-    yymsp[-3].minor.yy33->t = BINDING_BUILD;
-    /* yymsp[-3].minor.yy33->val =  */
+    yymsp[-3].minor.yy125 = calloc(sizeof(struct opam_binding_s), 1);
+    yymsp[-3].minor.yy125->name = strndup("run-test", 8);
+    yymsp[-3].minor.yy125->t = BINDING_BUILD;
+    /* yymsp[-3].minor.yy125->val =  */
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
-                    yymsp[-3].minor.yy33->name, strlen(yymsp[-3].minor.yy33->name), yymsp[-3].minor.yy33);
+                    opam_parse_state->pkg->bindings,
+                    yymsp[-3].minor.yy125->name, strlen(yymsp[-3].minor.yy125->name), yymsp[-3].minor.yy125);
 }
-#line 1353 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1383 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 9: /* cmdset ::= */
-#line 267 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 9: /* cmdlist ::= */
+#line 303 "lib/parser/syntaxis/opam_syntaxis.y"
 {
-    LOG_DEBUG(0, "cmdset null", "");
+    LOG_DEBUG(0, "cmdlist (empty)", "");
+    UT_array *cmds;
+    utarray_new(cmds, &opam_cmd_icd);
+    yymsp[1].minor.yy0.cmds = cmds;
 }
-#line 1360 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1393 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 10: /* cmdset ::= cmdset cmdspec */
-#line 271 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 10: /* cmdlist ::= cmdlist cmd */
+#line 310 "lib/parser/syntaxis/opam_syntaxis.y"
 {
-    LOG_DEBUG(0, "cmdset cmdspec", "");
+    LOG_DEBUG(0, "cmdlist cmd", "");
+    DUMP_ARGS(yymsp[0].minor.yy0.cmd->args);
+    utarray_push_back(yymsp[-1].minor.yy0.cmds, yymsp[0].minor.yy0.cmd);
+    yylhsminor.yy0.cmds = yymsp[-1].minor.yy0.cmds;
 }
-#line 1367 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1403 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+  yymsp[-1].minor.yy0 = yylhsminor.yy0;
         break;
-      case 11: /* cmdspec ::= cmd */
-#line 276 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 11: /* cmd ::= LBRACKET args RBRACKET */
+#line 317 "lib/parser/syntaxis/opam_syntaxis.y"
 {
-    LOG_DEBUG(0, "cmdspec:: cmd", "");
-}
-#line 1374 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-        break;
-      case 12: /* cmdspec ::= cmd filter */
-#line 281 "lib/parser/syntaxis/opam_syntaxis.y"
-{
-    LOG_DEBUG(0, "cmdspec:: cmd filter", "");
-}
-#line 1381 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-        break;
-      case 13: /* cmd ::= LBRACKET args RBRACKET */
-#line 285 "lib/parser/syntaxis/opam_syntaxis.y"
-{
-    LOG_DEBUG(0, "cmd:: args", "");
-}
-#line 1388 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-        break;
-      case 14: /* args ::= */
-#line 289 "lib/parser/syntaxis/opam_syntaxis.y"
-{
-    LOG_DEBUG(0, "args", "");
-}
-#line 1395 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-        break;
-      case 15: /* args ::= args arg */
-#line 301 "lib/parser/syntaxis/opam_syntaxis.y"
-{
-    LOG_DEBUG(0, "args arg: %s", yymsp[0].minor.yy0.s);
-}
-#line 1402 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-        break;
-      case 16: /* arg ::= STRING */
-#line 309 "lib/parser/syntaxis/opam_syntaxis.y"
-{
-    LOG_DEBUG(0, "string arg: %s", yymsp[0].minor.yy0.s);
-}
-#line 1409 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-        break;
-      case 17: /* arg ::= VARIDENT */
-#line 313 "lib/parser/syntaxis/opam_syntaxis.y"
-{
-    LOG_DEBUG(0, "var arg: %s", yymsp[0].minor.yy0.s);
+    LOG_DEBUG(0, "cmd:: [args]", "");
+    struct opam_cmd_s *cmd = (struct opam_cmd_s*)malloc(
+                       sizeof(struct opam_cmd_s));
+    cmd->args = yymsp[-1].minor.yy0.args;
+    yymsp[-2].minor.yy0.cmd = cmd;
+    DUMP_ARGS(yymsp[-2].minor.yy0.cmd->args);
 }
 #line 1416 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 18: /* arg ::= filter */
-#line 317 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 12: /* cmd ::= LBRACKET args RBRACKET filter */
+#line 326 "lib/parser/syntaxis/opam_syntaxis.y"
+{
+    LOG_DEBUG(0, "cmd:: [args] filter", "");
+    struct opam_cmd_s *cmd = (struct opam_cmd_s*)malloc(
+                       sizeof(struct opam_cmd_s));
+    cmd->args = yymsp[-2].minor.yy0.args;
+    cmd->filter = yymsp[0].minor.yy0.filter;
+    yymsp[-3].minor.yy0.cmd = cmd;
+}
+#line 1428 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+        break;
+      case 13: /* args ::= */
+#line 335 "lib/parser/syntaxis/opam_syntaxis.y"
+{
+    LOG_DEBUG(0, "args (empty)", "");
+    UT_array *args;
+    utarray_new(args, &opam_arg_icd);
+    /* struct opam_arg_s *arg = (struct opam_arg_s*)malloc( */
+    /*                    sizeof(struct opam_arg_s)); */
+    /* arg->val = strdup("testarg"); */
+    /* arg->t   = 0; */
+    /* utarray_push_back(args, arg); */
+    DUMP_ARGS(args);
+    yymsp[1].minor.yy0.args = args;
+}
+#line 1444 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+        break;
+      case 14: /* args ::= args arg */
+#line 348 "lib/parser/syntaxis/opam_syntaxis.y"
+{
+    LOG_DEBUG(0, "args arg val %s, type %d", yymsp[0].minor.yy0.arg->val, yymsp[0].minor.yy0.arg->t);
+    DUMP_ARGS(yymsp[-1].minor.yy0.args);
+    utarray_push_back(yymsp[-1].minor.yy0.args, yymsp[0].minor.yy0.arg);
+    DUMP_ARGS(yymsp[-1].minor.yy0.args);
+    yylhsminor.yy0 = yymsp[-1].minor.yy0;
+}
+#line 1455 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+  yymsp[-1].minor.yy0 = yylhsminor.yy0;
+        break;
+      case 15: /* arg ::= STRING */
+#line 356 "lib/parser/syntaxis/opam_syntaxis.y"
+{
+    LOG_DEBUG(0, "string arg: %s", yymsp[0].minor.yy0.s);
+    struct opam_arg_s *arg = (struct opam_arg_s*)malloc(
+                       sizeof(struct opam_arg_s));
+    arg->val = strdup(yymsp[0].minor.yy0.s);
+    arg->t   = 0;
+    yylhsminor.yy0.arg = arg;
+}
+#line 1468 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+  yymsp[0].minor.yy0 = yylhsminor.yy0;
+        break;
+      case 16: /* arg ::= VARIDENT */
+#line 365 "lib/parser/syntaxis/opam_syntaxis.y"
+{
+    LOG_DEBUG(0, "var arg: %s", yymsp[0].minor.yy0.s);
+    struct opam_arg_s *arg = (struct opam_arg_s*)malloc(
+                       sizeof(struct opam_arg_s));
+    arg->val = strdup(yymsp[0].minor.yy0.s);
+    arg->t   = 1;
+    yylhsminor.yy0.arg = arg;
+}
+#line 1481 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+  yymsp[0].minor.yy0 = yylhsminor.yy0;
+        break;
+      case 17: /* arg ::= filter */
+#line 374 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "filter arg", "");
 }
-#line 1423 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1489 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 19: /* binding ::= DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET */
-#line 332 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 18: /* binding ::= DEPENDS COLON LBRACKET filtered_package_formulas RBRACKET */
+#line 382 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "BINDING depends", "");
 #endif
-    yymsp[-4].minor.yy33 = calloc(sizeof(struct opam_binding_s), 1);
-    yymsp[-4].minor.yy33->name = strndup("depends", 7);
-    yymsp[-4].minor.yy33->t = BINDING_DEPENDS;
-    /* yymsp[-4].minor.yy33->val = ... will be list of pkgs */
+    yymsp[-4].minor.yy125 = calloc(sizeof(struct opam_binding_s), 1);
+    yymsp[-4].minor.yy125->name = strndup("depends", 7);
+    yymsp[-4].minor.yy125->t = BINDING_DEPENDS;
+    /* yymsp[-4].minor.yy125->val = ... will be list of pkgs */
     /* so here, alloc a UT hash table to hold the list */
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
-                    yymsp[-4].minor.yy33->name,
-                    strlen(yymsp[-4].minor.yy33->name),
-                    yymsp[-4].minor.yy33);
+                    opam_parse_state->pkg->bindings,
+                    yymsp[-4].minor.yy125->name,
+                    strlen(yymsp[-4].minor.yy125->name),
+                    yymsp[-4].minor.yy125);
 }
-#line 1442 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1508 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 20: /* binding ::= CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET */
-#line 349 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 19: /* binding ::= CONFLICTS COLON LBRACKET filtered_package_formulas RBRACKET */
+#line 399 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "BINDING conflicts", "");
 #endif
-    yymsp[-4].minor.yy33 = calloc(sizeof(struct opam_binding_s), 1);
-    yymsp[-4].minor.yy33->name = strndup("conflicts", 9);
-    yymsp[-4].minor.yy33->t = BINDING_DEPENDS;
-    /* yymsp[-4].minor.yy33->val =  */
+    yymsp[-4].minor.yy125 = calloc(sizeof(struct opam_binding_s), 1);
+    yymsp[-4].minor.yy125->name = strndup("conflicts", 9);
+    yymsp[-4].minor.yy125->t = BINDING_DEPENDS;
+    /* yymsp[-4].minor.yy125->val =  */
     HASH_ADD_KEYPTR(hh,
-                    opam_parse_state->pkg->entries,
-                    yymsp[-4].minor.yy33->name, strlen(yymsp[-4].minor.yy33->name), yymsp[-4].minor.yy33);
+                    opam_parse_state->pkg->bindings,
+                    yymsp[-4].minor.yy125->name, strlen(yymsp[-4].minor.yy125->name), yymsp[-4].minor.yy125);
 }
-#line 1458 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1524 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 21: /* stringlist ::= STRING */
-#line 362 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 20: /* stringlist ::= STRING */
+#line 412 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
     LOG_DEBUG(0, "STRINGLIST single: %s", yymsp[0].minor.yy0.s);
 #endif
-    utarray_new(yylhsminor.yy126, &ut_str_icd);
-    utarray_push_back(yylhsminor.yy126, &yymsp[0].minor.yy0.s);
+    utarray_new(yylhsminor.yy20, &ut_str_icd);
+    utarray_push_back(yylhsminor.yy20, &yymsp[0].minor.yy0.s);
 }
-#line 1469 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-  yymsp[0].minor.yy126 = yylhsminor.yy126;
+#line 1535 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+  yymsp[0].minor.yy20 = yylhsminor.yy20;
         break;
-      case 22: /* stringlist ::= stringlist STRING */
-#line 370 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 21: /* stringlist ::= stringlist STRING */
+#line 420 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
     LOG_DEBUG(0, "STRINGLIST multiple, ct: %d; new: %s",
-           utarray_len(yymsp[-1].minor.yy126), yymsp[0].minor.yy0.s);
+           utarray_len(yymsp[-1].minor.yy20), yymsp[0].minor.yy0.s);
 #endif
-    utarray_push_back(yymsp[-1].minor.yy126, &yymsp[0].minor.yy0.s);
-    yylhsminor.yy126 = yymsp[-1].minor.yy126;
+    utarray_push_back(yymsp[-1].minor.yy20, &yymsp[0].minor.yy0.s);
+    yylhsminor.yy20 = yymsp[-1].minor.yy20;
 }
-#line 1482 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
-  yymsp[-1].minor.yy126 = yylhsminor.yy126;
+#line 1548 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+  yymsp[-1].minor.yy20 = yylhsminor.yy20;
         break;
-      case 23: /* filtered_package_formulas ::= */
-#line 393 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 22: /* filtered_package_formulas ::= */
+#line 443 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "filtered_package_formulas: null", "");
 #endif
     }
-#line 1492 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1558 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 24: /* filtered_package_formulas ::= filtered_package_formulas fpf */
-#line 399 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 23: /* filtered_package_formulas ::= filtered_package_formulas fpf */
+#line 449 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "filtered_package_formulas leftrec", "");
 #endif
     }
-#line 1501 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1567 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 25: /* fpf ::= fpf LOGOP fpf */
-#line 405 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 24: /* fpf ::= fpf LOGOP fpf */
+#line 455 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "fpf: fpf LOGOP fpf", "");
 #endif
     }
-#line 1510 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1576 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 26: /* fpf ::= LPAREN fpf RPAREN */
-#line 411 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 25: /* fpf ::= LPAREN fpf RPAREN */
+#line 461 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "fpf: (fpf)", "");
 #endif
     }
-#line 1519 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1585 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 27: /* fpf ::= PKGNAME fvf_expr */
-#line 417 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 26: /* fpf ::= PKGNAME fvf_expr */
+#line 467 "lib/parser/syntaxis/opam_syntaxis.y"
 {
         LOG_DEBUG(1, "fpf: pkgname fvf_expr:**************** %s",
                   yymsp[-1].minor.yy0.s);
     }
-#line 1527 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1593 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 28: /* fpf ::= PKGNAME */
-#line 422 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 27: /* fpf ::= PKGNAME */
+#line 472 "lib/parser/syntaxis/opam_syntaxis.y"
 {
         LOG_DEBUG(0, "fpf: **************** pkgname: %s", yymsp[0].minor.yy0.s);
         /* Deps = calloc(sizeof(struct opam_binding_s), 1); */
         /*  */
     }
-#line 1536 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1602 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 29: /* fvf_expr ::= LBRACE fvf RBRACE */
-#line 429 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 28: /* fvf_expr ::= LBRACE fvf RBRACE */
+#line 479 "lib/parser/syntaxis/opam_syntaxis.y"
 {
       LOG_DEBUG(0, "fvf_expr: braces", "");
     }
-#line 1543 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1609 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 30: /* fvf ::= */
-#line 445 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 29: /* fvf ::= */
+#line 495 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "fvf: null", "");
 #endif
     }
-#line 1552 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1618 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 31: /* fvf ::= fvf logop_fvf */
-#line 451 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 30: /* fvf ::= fvf logop_fvf */
+#line 501 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "fvf: fvf logop_fvf", "");
 #endif
     }
-#line 1561 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1627 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 32: /* logop_fvf ::= LOGOP fvf */
-#line 457 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 31: /* logop_fvf ::= LOGOP fvf */
+#line 507 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "fvf: fvf logop fvf", "");
 #endif
     }
-#line 1570 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1636 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 33: /* fvf ::= fvf_base */
-#line 489 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 32: /* fvf ::= fvf_base */
+#line 539 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 #if YYDEBUG
         LOG_DEBUG(0, "fvf: fvf_base", "");
 #endif
        }
-#line 1579 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1645 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 34: /* fvf_base ::= VERSION */
-#line 501 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 33: /* fvf_base ::= VERSION */
+#line 551 "lib/parser/syntaxis/opam_syntaxis.y"
 { // treated as <string>
 #if YYDEBUG
         LOG_DEBUG(0, "fvf_base: version", "");
 #endif
     }
-#line 1588 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1654 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 35: /* filter ::= LBRACE pred RBRACE */
-#line 571 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 34: /* filter ::= LBRACE pred RBRACE */
+#line 621 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "{pred}", "");
 }
-#line 1595 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1661 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 36: /* pred ::= pred LOGOP pred */
-#line 574 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 35: /* pred ::= pred LOGOP pred */
+#line 624 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "compound pred: <pred> %s <pred>", yymsp[-1].minor.yy0.s);
 }
-#line 1602 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1668 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 37: /* pred ::= INT */
-      case 38: /* pred ::= STRING */ yytestcase(yyruleno==38);
-      case 39: /* pred ::= VARIDENT */ yytestcase(yyruleno==39);
-#line 577 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 36: /* pred ::= INT */
+      case 37: /* pred ::= STRING */ yytestcase(yyruleno==37);
+      case 38: /* pred ::= VARIDENT */ yytestcase(yyruleno==38);
+#line 627 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "pred: %s", yymsp[0].minor.yy0.s);
 }
-#line 1611 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1677 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 40: /* pred ::= BANG pred */
-#line 586 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 39: /* pred ::= BANG pred */
+#line 636 "lib/parser/syntaxis/opam_syntaxis.y"
 {
         LOG_DEBUG(0, "pred: BANG filter", "");
 }
-#line 1618 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1684 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 41: /* pred ::= QMARK pred */
-#line 589 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 40: /* pred ::= QMARK pred */
+#line 639 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "pred: QMARK pred", "");
 }
-#line 1625 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1691 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 42: /* pred ::= LPAREN pred RPAREN */
-#line 592 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 41: /* pred ::= LPAREN pred RPAREN */
+#line 642 "lib/parser/syntaxis/opam_syntaxis.y"
 {
     LOG_DEBUG(0, "pred: (pred)", "");
 }
-#line 1632 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1698 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 43: /* pred ::= pred RELOP pred */
-#line 595 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 42: /* pred ::= pred RELOP pred */
+#line 645 "lib/parser/syntaxis/opam_syntaxis.y"
 {
         LOG_DEBUG(0, "pred: pred %s pred", yymsp[-1].minor.yy0.s);
 }
-#line 1639 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1705 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
-      case 44: /* string3 ::= TQ STRING3 TQ */
-      case 45: /* string3 ::= TQ STRING3 STRING STRING3 TQ */ yytestcase(yyruleno==45);
-#line 641 "lib/parser/syntaxis/opam_syntaxis.y"
+      case 43: /* string3 ::= TQ STRING3 TQ */
+      case 44: /* string3 ::= TQ STRING3 STRING STRING3 TQ */ yytestcase(yyruleno==44);
+#line 691 "lib/parser/syntaxis/opam_syntaxis.y"
 {
 }
-#line 1646 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1712 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
         break;
       default:
         break;
@@ -1686,11 +1752,11 @@ static void yy_parse_failed(
   /* Here code is inserted which will be executed whenever the
   ** parser fails */
 /************ Begin %parse_failure code ***************************************/
-#line 156 "lib/parser/syntaxis/opam_syntaxis.y"
+#line 172 "lib/parser/syntaxis/opam_syntaxis.y"
 
     LOG_ERROR(0, "Giving up.  Parser is hopelessly lost... %d",
     yypParser->yyerrcnt);
-#line 1694 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1760 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
 /************ End %parse_failure code *****************************************/
   ParseARG_STORE /* Suppress warning about unused %extra_argument variable */
   ParseCTX_STORE
@@ -1709,7 +1775,7 @@ static void yy_syntax_error(
   ParseCTX_FETCH
 #define TOKEN yyminor
 /************ Begin %syntax_error code ****************************************/
-#line 133 "lib/parser/syntaxis/opam_syntaxis.y"
+#line 149 "lib/parser/syntaxis/opam_syntaxis.y"
 
     LOG_ERROR(0, RED "SYNTAX ERROR" CRESET " yymajor: %d", yymajor);
     LOG_ERROR(0, RED "tos.stateno" CRESET ": %d", yypParser->yytos->stateno);
@@ -1727,7 +1793,7 @@ static void yy_syntax_error(
      
      log_error("trying to recover...");
       
-#line 1731 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1797 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
 /************ End %syntax_error code ******************************************/
   ParseARG_STORE /* Suppress warning about unused %extra_argument variable */
   ParseCTX_STORE
@@ -1753,10 +1819,10 @@ static void yy_accept(
   /* Here code is inserted which will be executed whenever the
   ** parser accepts */
 /*********** Begin %parse_accept code *****************************************/
-#line 152 "lib/parser/syntaxis/opam_syntaxis.y"
+#line 168 "lib/parser/syntaxis/opam_syntaxis.y"
 
     LOG_TRACE(0, "Parsing complete", "");
-#line 1760 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
+#line 1826 "bazel-out/darwin_arm64-fastbuild/bin/lib/parser/syntaxis/opam_syntaxis.c"
 /*********** End %parse_accept code *******************************************/
   ParseARG_STORE /* Suppress warning about unused %extra_argument variable */
   ParseCTX_STORE
