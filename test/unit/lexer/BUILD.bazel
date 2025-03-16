@@ -8,14 +8,14 @@ load("//config/cc:CONFIG.bzl", "BASE_COPTS")
 TIMEOUT = "short"
 
 test_suite(
-    name = "lexis",
+    name = "lexer",
     tests = [
-        ":lexer"
+        ":lexer_test"
     ]
 )
 ########
 cc_test(
-    name       = "lexer",
+    name       = "lexer_test",
     linkstatic = True,
     srcs       = [
         "lexer_test.c", "lex_string_driver.c",

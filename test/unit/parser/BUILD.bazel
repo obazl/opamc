@@ -8,14 +8,14 @@ load("//config/cc:CONFIG.bzl", "BASE_COPTS")
 TIMEOUT = "short"
 
 test_suite(
-    name = "syntaxis",
+    name = "parser",
     tests = [
-        ":parser"
+        ":parser_test"
     ]
 )
 ########
 cc_test(
-    name       = "parser",
+    name       = "parser_test",
     linkstatic = True,
     srcs       = ["parser_test.c",
                   "parser_test_init.c",
